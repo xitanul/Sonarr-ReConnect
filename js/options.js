@@ -10,42 +10,42 @@
 /**
 * Check if url ends with a /
 */
+import { normalizeBaseUrl } from './utils.js';
+import { Settings } from './settings.js';
+
 // checkUrl function removed, using normalizeBaseUrl from utils.js
 
 //empty sonarrConfig object
-var sonarrConfig = {};
+let sonarrConfig = {};
 
 /**
  * Test connection to sonarr server with api key. api/system/status call is used
  */
-function test_connection() {
-  var apiKey = document.getElementById('apiKey').value;
-  var url = normalizeBaseUrl(document.getElementById('url').value);
+async function test_connection() {
+  const apiKey = document.getElementById('apiKey').value;
+  const url = normalizeBaseUrl(document.getElementById('url').value);
   document.getElementById('url').value = url;
-  var status = document.getElementById('connectionStatus');
+  const status = document.getElementById('connectionStatus');
 
   status.textContent = 'Connecting to ' + url;
-  $.ajax({
-    url: url + 'api/v3/system/status?apiKey=' + apiKey,
-    statusCode: {
-      401: function () {
-        status.textContent = 'Credentials or url are not correct';
-      },
-      404: function () {
-        status.textContent = 'Sonarr is not running on this address';
-      }
-    },
-    complete: function (data) {
-      if (typeof (data.responseJSON) != "undefined") {
-        status.textContent = 'Connection successful!';
-        getInstallationInformation(data.responseJSON);
-        sonarrConfig = data.responseJSON;
-      } else {
-        status.textContent = 'Credentials or url are not correct';
-      }
-    }
 
-  });
+  try {
+    const response = await fetch(url + 'api/v3/system/status?apiKey=' + apiKey);
+    if (response.status === 401) {
+      status.textContent = 'Credentials or url are not correct';
+      return;
+    }
+    if (!response.ok) {
+      status.textContent = 'Sonarr is not running on this address';
+      return;
+    }
+    const data = await response.json();
+    status.textContent = 'Connection successful!';
+    getInstallationInformation(data);
+    sonarrConfig = data;
+  } catch (error) {
+    status.textContent = 'Sonarr is not running on this address';
+  }
 }
 
 function getInstallationInformation(data) {
@@ -58,13 +58,13 @@ function getInstallationInformation(data) {
  * Save settings to chrome storage
  */
 function save_options() {
-  var apiKey = document.getElementById('apiKey').value;
-  var url = normalizeBaseUrl(document.getElementById('url').value);
-  var numberOfDaysCalendar = document.getElementById('numberOfDaysCalendar').value;
-  var wantedItems = document.getElementById('wantedItems').value;
-  var historyItems = document.getElementById('historyItems').value;
-  var backgroundInterval = document.getElementById('backgroundInterval').value;
-  var showBadge = $('#show-badge:checked').val();
+  const apiKey = document.getElementById('apiKey').value;
+  const url = normalizeBaseUrl(document.getElementById('url').value);
+  const numberOfDaysCalendar = document.getElementById('numberOfDaysCalendar').value;
+  const wantedItems = document.getElementById('wantedItems').value;
+  const historyItems = document.getElementById('historyItems').value;
+  const backgroundInterval = document.getElementById('backgroundInterval').value;
+  let showBadge = document.getElementById('show-badge').checked;
   if (showBadge == undefined)
     showBadge = false;
 
@@ -87,7 +87,7 @@ function save_options() {
     // Update status to let user know options were saved.
     var status = document.getElementById('status');
     status.textContent = 'Options saved.';
-    setTimeout(function () {
+    setTimeout(() => {
       status.textContent = '';
     }, 750);
   });
@@ -108,7 +108,7 @@ function restore_options() {
     document.getElementById('backgroundInterval').value = items.backgroundInterval;
     console.log(items);
     if (items.showBadge) {
-      $("#show-badge").attr("checked", true);
+      document.getElementById("show-badge").checked = true;
     }
   });
 

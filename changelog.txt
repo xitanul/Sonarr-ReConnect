@@ -1,4 +1,10 @@
 Version log
+3.0.0
+Complete Modernization and Modular Architecture
+- Replaced jQuery with native DOM/Fetch APIs
+- Modularized codebase for better maintainability
+- Restored original visual fidelity and fixed list visibility
+
 2.0.0
 Add support for Sonarr v3 API, used in Sonarr v3 and v4
 Fix poster display on Series tab
@@ -23,7 +29,6 @@ Check if image url is set
 Updated badge behavior + added interval time in settings
 Fix images on protected environment
 Technical updates to better handle large amounts of data
-
 
 1.2.0
 Change name to Sonarr Connect

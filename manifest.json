@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Sonarr ReConnect",
   "description": "Show upcoming/missing episodes, your series and history from Sonarr",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "icons": {
     "16": "16.png",
     "48": "48.png",
@@ -17,7 +17,8 @@
     "default_popup": "popup.html"
   },
   "background": {
-    "service_worker": "js/background.js"
+    "service_worker": "js/background.js",
+    "type": "module"
   },
   "options_ui": {
     "page": "options.html",

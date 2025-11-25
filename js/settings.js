@@ -1,4 +1,4 @@
-const Settings = {
+export const Settings = {
     defaults: {
         apiKey: '',
         url: 'http://localhost:8989',

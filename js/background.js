@@ -1,4 +1,5 @@
-importScripts('utils.js', 'settings.js');
+import { normalizeBaseUrl } from './utils.js';
+import { Settings } from './settings.js';
 
 const background = {
   settings: {},
