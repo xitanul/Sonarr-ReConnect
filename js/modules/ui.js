@@ -328,11 +328,12 @@ export class UI {
 
         // Status logic
         const statusClass = getEpisodeStatus(episode);
-        el.querySelector('.status').className = `status ${statusClass}`;
+        // Preserve 'label' class from template while adding status classes
+        el.querySelector('.status').className = `status label ${statusClass.replace('label ', '')}`;
 
         let statusText = '';
         if (statusClass.includes('success')) statusText = 'downloaded';
-        else if (statusClass.includes('missing')) statusText = 'missing';
+        else if (statusClass.includes('missing')) statusText = 'Missing';
         else if (statusClass.includes('warning')) statusText = 'unmonitored';
 
         el.querySelector('.status').textContent = statusText;

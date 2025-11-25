@@ -55,5 +55,12 @@ export function getRelativeTime(dateString) {
   else if (diffMins > 0) timeStr = `${diffMins} minute${diffMins > 1 ? 's' : ''}`;
   else timeStr = "a few seconds";
 
-  return isFuture ? `in ${timeStr}` : `${timeStr} ago`;
+  const relativeStr = isFuture ? `in ${timeStr}` : `${timeStr} ago`;
+
+  // Add prefix based on original extension behavior
+  if (isFuture) {
+    return `Airs ${relativeStr}`;
+  } else {
+    return `Aired ${relativeStr}`;
+  }
 }

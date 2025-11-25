@@ -38,7 +38,11 @@ export function getEpisodeStatus(episode) {
     if (episode.hasFile) {
         labelClass = 'label success';
     } else if (episode.monitored) {
-        if (airDate < now) {
+        // Label as missing if it's in the past OR if it's airing today
+        // This ensures 'Wanted' items and 'Today' items get the label,
+        // but 'Tomorrow' and later do not.
+        const isToday = now.toDateString() === airDate.toDateString();
+        if (airDate < now || isToday) {
             labelClass = 'label missing';
         } else {
             labelClass = 'label regular';

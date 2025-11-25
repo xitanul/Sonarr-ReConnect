@@ -419,15 +419,11 @@ p {
   background-color: white;
   color: #333;
   border: 1px solid #ccc;
-}
-
-.label.missing {
-  background-color: white;
-  color: #333;
-  border: none;
   font-weight: bold;
   border-radius: 3px;
   padding: 0.1rem 0.4rem;
+  font-size: 0.7rem;
+  /* Match original size */
 }
 
 .label.quality {
