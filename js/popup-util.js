@@ -1,27 +1,34 @@
 import { normalizeBaseUrl } from './utils.js';
+import { EPISODE_STATUS_LABELS } from './constants.js';
 
+/**
+ * Calculate the appropriate label class for episode file count display
+ * @param {number} episodeFileCount - Number of downloaded episodes
+ * @param {number} totalEpisodeCount - Total number of episodes
+ * @param {boolean} monitored - Whether the series is monitored
+ * @param {string} status - Series status ('continuing' or 'ended')
+ * @returns {string} CSS class name for the label
+ */
 export function calculateEpisodeQuoteColor(episodeFileCount, totalEpisodeCount, monitored, status) {
-    const episodeQuote = {
-        'continuing': 'label regular',
-        'ended': 'label success',
-        'missing-monitored': 'label alert',
-        'missing-not-monitored': 'label warning'
-    }
-
     let label = ""
     if (episodeFileCount === totalEpisodeCount)
         if (status === 'continuing')
-            label = episodeQuote['continuing'];
+            label = EPISODE_STATUS_LABELS['continuing'];
         else
-            label = episodeQuote['ended'];
+            label = EPISODE_STATUS_LABELS['ended'];
     else if (monitored)
-        label = episodeQuote['missing-monitored'];
+        label = EPISODE_STATUS_LABELS['missing-monitored'];
     else
-        label = episodeQuote['missing-not-monitored'];
+        label = EPISODE_STATUS_LABELS['missing-not-monitored'];
 
     return label;
 }
 
+/**
+ * Get CSS label class for episode status
+ * @param {Object} episode - Episode object with hasFile, monitored, and airDateUTC properties
+ * @returns {string} CSS class name for the status label
+ */
 export function getEpisodeStatus(episode) {
     const now = new Date();
     const airDate = new Date(episode.airDateUtc);
@@ -51,6 +58,13 @@ export function formatDate(date, positiveOffset) {
     return (date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + (date.getDate()));
 }
 
+/**
+ * Get image URL for Sonarr media (posters, banners, etc.)
+ * @param {Object} data - Image data object with url property
+ * @param {string} baseUrl - Sonarr base URL
+ * @param {string} apiKey - API key for authentication
+ * @returns {string} Full image URL with API key authentication
+ */
 export function getImageUrl(data, baseUrl, apiKey) {
     if (typeof data === "object") {
         const start = data.url.indexOf('MediaCover')
@@ -65,7 +79,12 @@ export function getImageUrl(data, baseUrl, apiKey) {
     }
 }
 
-//format episodenumbers to match scene formatting
+/**
+ * Format episode number to scene format (e.g., S01E05)
+ * @param {number} seasonNumber - Season number
+ * @param {number} episodeNumber - Episode number
+ * @returns {string} Formatted episode number (e.g., "S01E05")
+ */
 export const formatEpisodeNumer = function (seasonNumber, episodeNumber) {
     const episodeNum = "S" + (seasonNumber.toString().length === 1 ? '0' : '') + seasonNumber + "E" + (episodeNumber.toString().length === 1 ? '0' : '') + episodeNumber;
     return episodeNum;
