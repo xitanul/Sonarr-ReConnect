@@ -1,5 +1,6 @@
 import { getRelativeTime, normalizeBaseUrl } from '../utils.js';
 import { calculateEpisodeQuoteColor, formatEpisodeNumer, getImageUrl, seriesComparator, getEpisodeStatus } from '../popup-util.js';
+import { HISTORY_EVENT_TYPES } from '../constants.js';
 
 export class UI {
     constructor(settings) {
@@ -272,11 +273,9 @@ export class UI {
                 el.querySelector('.episodenum').textContent = formatEpisodeNumer(item.episode.seasonNumber, item.episode.episodeNumber);
             }
             el.querySelector('.date').textContent = getRelativeTime(item.date);
-            let eventType = item.eventType;
-            if (eventType === 'downloadFolderImported') eventType = 'Imported';
-            else if (eventType === 'grabbed') eventType = 'Grabbed';
-            else if (eventType === 'downloadFailed') eventType = 'Failed';
 
+            // Map event type to display name
+            const eventType = HISTORY_EVENT_TYPES[item.eventType] || item.eventType;
             el.querySelector('.status').textContent = eventType;
             el.querySelector('.status').classList.add(item.eventType); // Use original for class
 
@@ -347,8 +346,9 @@ export class UI {
             const qualitySpan = document.createElement('span');
             qualitySpan.className = 'label secondary';
             qualitySpan.textContent = episode.episodeQuality;
-            el.querySelector('.episode-info .episode-info').prepend(qualitySpan);
-            el.querySelector('.episode-info .episode-info').prepend(document.createTextNode(' '));
+            const infoEl = el.querySelector('.episode-info');
+            infoEl.prepend(qualitySpan);
+            infoEl.prepend(document.createTextNode(' '));
         }
 
         return clone;

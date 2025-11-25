@@ -23,8 +23,16 @@ export const EPISODE_STATUS_LABELS = {
 };
 
 // History event type display names
+// Based on Sonarr API documentation
+// Event types: 0=Unknown, 1=Grabbed, 2=SeriesFolderImported, 3=DownloadFolderImported
+//              4=DownloadFailed, 5=EpisodeFileDeleted, 6=EpisodeFileRenamed, 7=DownloadIgnored
 export const HISTORY_EVENT_TYPES = {
-    'downloadFolderImported': 'Imported',
+    'unknown': 'Unknown',
     'grabbed': 'Grabbed',
-    'downloadFailed': 'Failed'
+    'seriesFolderImported': 'Series Imported',
+    'downloadFolderImported': 'Imported',
+    'downloadFailed': 'Failed',
+    'episodeFileDeleted': 'Deleted',
+    'episodeFileRenamed': 'Renamed',
+    'downloadIgnored': 'Ignored'
 };

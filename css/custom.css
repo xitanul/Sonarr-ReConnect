@@ -462,6 +462,34 @@ p {
   padding: 0.1rem 0.4rem;
 }
 
+.label.episodeFileDeleted {
+  background-color: #c82333;
+  color: white;
+  border-radius: 3px;
+  padding: 0.1rem 0.4rem;
+}
+
+.label.episodeFileRenamed {
+  background-color: #17a2b8;
+  color: white;
+  border-radius: 3px;
+  padding: 0.1rem 0.4rem;
+}
+
+.label.downloadIgnored {
+  background-color: #6c757d;
+  color: white;
+  border-radius: 3px;
+  padding: 0.1rem 0.4rem;
+}
+
+.label.seriesFolderImported {
+  background-color: #28a745;
+  color: white;
+  border-radius: 3px;
+  padding: 0.1rem 0.4rem;
+}
+
 .label:empty {
   display: none;
 }
