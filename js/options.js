@@ -28,6 +28,7 @@ async function test_connection() {
   const status = document.getElementById('connectionStatus');
 
   status.textContent = 'Connecting to ' + url;
+  status.style.color = '';
 
   try {
     const response = await fetch(url + 'api/v3/system/status', {
@@ -36,19 +37,28 @@ async function test_connection() {
       }
     });
     if (response.status === 401) {
-      status.textContent = 'Credentials or url are not correct';
+      status.textContent = 'Authentication failed: Invalid API key';
+      status.style.color = 'red';
       return;
     }
     if (!response.ok) {
-      status.textContent = 'Sonarr is not running on this address';
+      status.textContent = `Connection failed: Server returned ${response.status} ${response.statusText}`;
+      status.style.color = 'red';
       return;
     }
     const data = await response.json();
-    status.textContent = 'Connection successful!';
+    status.textContent = `✓ Connected successfully to Sonarr v${data.version}`;
+    status.style.color = 'green';
     getInstallationInformation(data);
     sonarrConfig = data;
   } catch (error) {
-    status.textContent = 'Sonarr is not running on this address';
+    if (error.message.includes('Failed to fetch')) {
+      status.textContent = 'Connection failed: Unable to reach Sonarr server at ' + url;
+    } else {
+      status.textContent = 'Connection failed: ' + error.message;
+    }
+    status.style.color = 'red';
+    console.error('[Options] Connection test failed:', error);
   }
 }
 

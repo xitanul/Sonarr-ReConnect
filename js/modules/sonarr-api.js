@@ -64,14 +64,33 @@ export class SonarrApi {
     }
 
     async _fetch(url) {
-        const response = await fetch(url, {
-            headers: {
-                'X-Api-Key': this.settings.apiKey
+        try {
+            const response = await fetch(url, {
+                headers: {
+                    'X-Api-Key': this.settings.apiKey
+                }
+            });
+
+            if (!response.ok) {
+                // Provide detailed error messages based on status code
+                if (response.status === 401) {
+                    throw new Error(`API Error (401): Unauthorized - Check your API key`);
+                } else if (response.status === 404) {
+                    throw new Error(`API Error (404): Resource not found`);
+                } else if (response.status >= 500) {
+                    throw new Error(`API Error (${response.status}): Sonarr server error - ${response.statusText}`);
+                } else {
+                    throw new Error(`API Error (${response.status}): ${response.statusText}`);
+                }
             }
-        });
-        if (!response.ok) {
-            throw new Error(`API Error: ${response.status} ${response.statusText}`);
+
+            return response.json();
+        } catch (error) {
+            // Re-throw with better message if it's a network error
+            if (error.message.includes('Failed to fetch')) {
+                throw new Error('NetworkError: Unable to connect to Sonarr - Check server URL and status');
+            }
+            throw error;
         }
-        return response.json();
     }
 }

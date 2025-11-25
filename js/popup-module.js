@@ -3,6 +3,7 @@ import { Storage } from './storage.js';
 import { SonarrApi } from './modules/sonarr-api.js';
 import { UI } from './modules/ui.js';
 import { formatDate } from './popup-util.js';
+import { ErrorHandler } from './error-handler.js';
 
 const app = {
     settings: {},
@@ -65,8 +66,10 @@ const app = {
 
             // Deselect menu items
             document.querySelectorAll('.menu .item').forEach(el => el.classList.remove('active'));
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            console.error('Error loading show:', error);
+            const message = ErrorHandler.getUserMessage(error);
+            ErrorHandler.showErrorState(this.ui.container, message, () => this.loadShow(seriesId));
         }
     },
 
@@ -105,8 +108,10 @@ const app = {
                 await Storage.set(mode, data);
                 this.render(mode, data);
             }
-        } catch (e) {
-            console.error(e);
+        } catch (error) {
+            console.error('Error loading data:', error);
+            const message = ErrorHandler.getUserMessage(error);
+            ErrorHandler.showErrorState(this.ui.container, message, () => this.load(mode));
         }
     },
 
