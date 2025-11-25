@@ -24,9 +24,13 @@ const background = {
     const baseUrl = normalizeBaseUrl(this.settings.url);
     const apikey = this.settings.apiKey;
     const wantedItems = this.settings.wantedItems;
-    const url = `${baseUrl}api/v3/wanted/missing?page=1&pageSize=${wantedItems}&sortKey=airDateUtc&sortDir=desc&includeSeries=true&apikey=${apikey}`;
+    const url = `${baseUrl}api/v3/wanted/missing?page=1&pageSize=${wantedItems}&sortKey=airDateUtc&sortDir=desc&includeSeries=true`;
     try {
-      const response = await fetch(url);
+      const response = await fetch(url, {
+        headers: {
+          'X-Api-Key': apikey
+        }
+      });
       if (!response.ok) {
         throw new Error(`API Error: ${response.status} ${response.statusText}`);
       }

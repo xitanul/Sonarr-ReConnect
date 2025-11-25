@@ -54,7 +54,7 @@ export function formatDate(date, positiveOffset) {
 export function getImageUrl(data, baseUrl, apiKey) {
     if (typeof data == "object") {
         const start = data.url.indexOf('MediaCover')
-        const newUrl = normalizeBaseUrl(baseUrl) + "api/v3/" + data.url.substring(start) + "&apikey=" + apiKey;
+        const newUrl = normalizeBaseUrl(baseUrl) + "api/v3/" + data.url.substring(start);
         return newUrl;
     } else {
         const noimg = "";

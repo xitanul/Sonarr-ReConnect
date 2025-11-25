@@ -30,7 +30,11 @@ async function test_connection() {
   status.textContent = 'Connecting to ' + url;
 
   try {
-    const response = await fetch(url + 'api/v3/system/status?apiKey=' + apiKey);
+    const response = await fetch(url + 'api/v3/system/status', {
+      headers: {
+        'X-Api-Key': apiKey
+      }
+    });
     if (response.status === 401) {
       status.textContent = 'Credentials or url are not correct';
       return;

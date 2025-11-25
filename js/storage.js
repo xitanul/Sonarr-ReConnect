@@ -20,17 +20,23 @@ export const Storage = {
     },
 
     async migrate() {
+        // Check if localStorage is available (not available in service workers)
+        if (typeof localStorage === 'undefined') {
+            console.log('localStorage not available in this context, skipping migration');
+            return;
+        }
+
         const keys = ['wanted', 'calendar', 'history', 'series'];
         for (const key of keys) {
-            const value = localStorage.getItem(key);
-            if (value && value !== 'undefined') {
-                try {
+            try {
+                const value = localStorage.getItem(key);
+                if (value && value !== 'undefined') {
                     await this.set(key, JSON.parse(value));
                     localStorage.removeItem(key);
                     console.log(`Migrated ${key} to chrome.storage.local`);
-                } catch (e) {
-                    console.error('Migration failed for', key, e);
                 }
+            } catch (e) {
+                console.error('Migration failed for', key, e);
             }
         }
     }
