@@ -207,7 +207,14 @@ export class UI {
         showEl.querySelector('#summary').textContent = series.overview;
 
         showEl.querySelector('#seasons').textContent = series.seasons ? series.seasons.length : 0;
-        showEl.querySelector('#episodes').textContent = series.statistics ? series.statistics.episodeCount : 0;
+        const epStats = series.statistics;
+        const epText = epStats ? `${epStats.episodeFileCount}/${epStats.episodeCount}` : '0/0';
+        const epEl = showEl.querySelector('#episodes');
+        epEl.textContent = epText;
+
+        if (epStats) {
+            epEl.className = `episodes label ${calculateEpisodeQuoteColor(epStats.episodeFileCount, epStats.episodeCount, series.monitored, series.status)}`;
+        }
 
         // Group episodes by season
         const seasons = {};
