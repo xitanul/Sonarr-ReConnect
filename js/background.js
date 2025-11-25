@@ -27,6 +27,9 @@ const background = {
     const url = `${baseUrl}api/v3/wanted/missing?page=1&pageSize=${wantedItems}&sortKey=airDateUtc&sortDir=desc&includeSeries=true&apikey=${apikey}`;
     try {
       const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
       const data = await response.json();
       const numMissingEpisodes = data.totalRecords;
       this.updateBadge(numMissingEpisodes.toString());
@@ -35,7 +38,7 @@ const background = {
     }
   },
   updateBadge: function (text) {
-    if (text && (this.settings.showBadge === "true" || parseInt(text, 10) > 0)) {
+    if (this.settings.showBadge && text && parseInt(text, 10) > 0) {
       chrome.action.setBadgeText({ text: text.toString() });
     } else {
       chrome.action.setBadgeText({ text: '' });

@@ -44,11 +44,6 @@ export class SonarrApi {
         return this._fetch(url);
     }
 
-    async getSeriesById(seriesId) {
-        const url = `${this.baseUrl}api/v3/series/${seriesId}?apikey=${this.settings.apiKey}`;
-        return this._fetch(url);
-    }
-
     async toggleEpisodeMonitor(episodeIds, monitored) {
         const url = `${this.baseUrl}api/v3/episode/monitor?apikey=${this.settings.apiKey}`;
         const response = await fetch(url, {
