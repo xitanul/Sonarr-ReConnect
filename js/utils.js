@@ -17,7 +17,7 @@ export function normalizeBaseUrl(url) {
 
   // Ensure trailing slash
   // Only add slash if length > 7 (to avoid adding to just "http://")
-  if (url.substr(-1) !== '/' && url.length > 7) {
+  if (url.slice(-1) !== '/' && url.length > 7) {
     url = url + '/';
   }
 

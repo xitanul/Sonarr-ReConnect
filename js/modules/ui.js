@@ -13,6 +13,66 @@ export class UI {
         this.container = document.querySelector('.list');
     }
 
+    /**
+     * Attach monitor toggle event handler to an episode element
+     * @param {Element} element - The episode element containing the monitor icon
+     * @param {Object} episode - The episode data object with id and monitored status
+     */
+    _attachMonitorToggle(element, episode) {
+        const monitorIcon = element.querySelector('.watched-indicator');
+        if (!monitorIcon) return;
+
+        // Set initial state
+        if (episode.monitored) {
+            monitorIcon.classList.remove('icon-negative');
+        } else {
+            monitorIcon.classList.add('icon-negative');
+        }
+
+        // Add click handler
+        monitorIcon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isMonitored = !monitorIcon.classList.contains('icon-negative');
+            const newMonitored = !isMonitored;
+
+            // Update UI
+            if (newMonitored) {
+                monitorIcon.classList.remove('icon-negative');
+            } else {
+                monitorIcon.classList.add('icon-negative');
+            }
+
+            // Dispatch event
+            const event = new CustomEvent('toggle-monitor', {
+                detail: {
+                    episodeId: episode.id,
+                    monitored: newMonitored
+                },
+                bubbles: true
+            });
+            this.container.dispatchEvent(event);
+        });
+    }
+
+    /**
+     * Attach series navigation event handler to an element
+     * @param {Element} element - The element to make clickable
+     * @param {number} seriesId - The series ID to navigate to
+     */
+    _attachSeriesNavigation(element, seriesId) {
+        if (!element || !seriesId) return;
+
+        element.style.cursor = 'pointer';
+        element.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const event = new CustomEvent('show-details', {
+                detail: { seriesId },
+                bubbles: true
+            });
+            this.container.dispatchEvent(event);
+        });
+    }
+
     renderCalendarGroups(groups) {
         const order = ['Wanted', 'Today', 'Tomorrow', 'Later'];
 
@@ -32,61 +92,12 @@ export class UI {
                 episodes.forEach(ep => {
                     const epEl = this.createEpisodeElement(ep, ep.series?.title);
 
-                    // Monitor Toggle (Manual Fix)
-                    const monitorIcon = epEl.querySelector('.watched-indicator');
-                    if (ep.monitored) {
-                        monitorIcon.classList.remove('icon-negative');
-                    } else {
-                        monitorIcon.classList.add('icon-negative');
-                    }
+                    // Attach event handlers using helper methods
+                    this._attachMonitorToggle(epEl, ep);
 
-                    // Remove existing listeners (cloneNode doesn't copy them, but createEpisodeElement added them)
-                    // We need to replace the element to clear listeners? 
-                    // Or just add a new one that stops propagation?
-                    // createEpisodeElement adds a listener.
-                    // If I add another one, both run.
-                    // I should probably remove the listener in createEpisodeElement or overwrite it.
-                    // But I can't remove anonymous function.
-                    // So I should clone the node again?
-                    // Or just update createEpisodeElement to NOT add listener?
-                    // But I want to keep createEpisodeElement generic.
-
-                    // I'll clone the monitorIcon to strip listeners
-                    const newMonitorIcon = monitorIcon.cloneNode(true);
-                    monitorIcon.parentNode.replaceChild(newMonitorIcon, monitorIcon);
-
-                    newMonitorIcon.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const isMonitored = !newMonitorIcon.classList.contains('icon-negative');
-                        const newMonitored = !isMonitored;
-
-                        if (newMonitored) {
-                            newMonitorIcon.classList.remove('icon-negative');
-                        } else {
-                            newMonitorIcon.classList.add('icon-negative');
-                        }
-
-                        const event = new CustomEvent('toggle-monitor', {
-                            detail: {
-                                episodeId: ep.id,
-                                monitored: newMonitored
-                            },
-                            bubbles: true
-                        });
-                        this.container.dispatchEvent(event);
-                    });
-
-                    // Explicitly add listener here to ensure it works
                     const titleEl = epEl.querySelector('.series-title');
-                    if (titleEl && (ep.seriesId || ep.series?.id)) {
-                        titleEl.style.cursor = 'pointer';
-                        titleEl.addEventListener('click', (e) => {
-                            e.stopPropagation();
-                            const sId = ep.seriesId || ep.series?.id;
-                            const event = new CustomEvent('show-details', { detail: { seriesId: sId }, bubbles: true });
-                            this.container.dispatchEvent(event);
-                        });
-                    }
+                    const seriesId = ep.seriesId || ep.series?.id;
+                    this._attachSeriesNavigation(titleEl, seriesId);
 
                     episodesContainer.appendChild(epEl);
                 });
@@ -240,37 +251,8 @@ export class UI {
         episodes.forEach(ep => {
             const el = this.createEpisodeElement(ep, null);
 
-            // Monitor Toggle (Manual Fix)
-            const monitorIcon = el.querySelector('.watched-indicator');
-            if (ep.monitored) {
-                monitorIcon.classList.remove('icon-negative');
-            } else {
-                monitorIcon.classList.add('icon-negative');
-            }
-
-            const newMonitorIcon = monitorIcon.cloneNode(true);
-            monitorIcon.parentNode.replaceChild(newMonitorIcon, monitorIcon);
-
-            newMonitorIcon.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const isMonitored = !newMonitorIcon.classList.contains('icon-negative');
-                const newMonitored = !isMonitored;
-
-                if (newMonitored) {
-                    newMonitorIcon.classList.remove('icon-negative');
-                } else {
-                    newMonitorIcon.classList.add('icon-negative');
-                }
-
-                const event = new CustomEvent('toggle-monitor', {
-                    detail: {
-                        episodeId: ep.id,
-                        monitored: newMonitored
-                    },
-                    bubbles: true
-                });
-                this.container.dispatchEvent(event);
-            });
+            // Attach monitor toggle using helper method
+            this._attachMonitorToggle(el, ep);
 
             container.appendChild(el);
         });
@@ -281,13 +263,9 @@ export class UI {
             const clone = this.templates.episode.content.cloneNode(true);
             const el = clone.querySelector('.episode');
 
-            el.querySelector('.series-title').textContent = item.series?.title || 'Unknown Series';
-            el.querySelector('.series-title').style.cursor = 'pointer';
-            el.querySelector('.series-title').addEventListener('click', (e) => {
-                e.stopPropagation();
-                const event = new CustomEvent('show-details', { detail: { seriesId: item.seriesId }, bubbles: true });
-                this.container.dispatchEvent(event);
-            });
+            const seriesTitleEl = el.querySelector('.series-title');
+            seriesTitleEl.textContent = item.series?.title || 'Unknown Series';
+            this._attachSeriesNavigation(seriesTitleEl, item.seriesId);
 
             el.querySelector('.episodename').textContent = item.episode?.title || 'Unknown Episode';
             if (item.episode) {
@@ -306,36 +284,13 @@ export class UI {
                 el.querySelector('.quality').textContent = item.quality.quality.name;
             }
 
-            // Monitor Toggle
-            const monitorIcon = clone.querySelector('.watched-indicator');
-            const isMonitored = item.episode ? item.episode.monitored : false;
-
-            if (isMonitored) {
-                monitorIcon.classList.remove('icon-negative');
-            } else {
-                monitorIcon.classList.add('icon-negative');
-            }
-
-            monitorIcon.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const currentMonitored = !monitorIcon.classList.contains('icon-negative');
-                const newMonitored = !currentMonitored;
-
-                if (newMonitored) {
-                    monitorIcon.classList.remove('icon-negative');
-                } else {
-                    monitorIcon.classList.add('icon-negative');
-                }
-
-                const event = new CustomEvent('toggle-monitor', {
-                    detail: {
-                        episodeId: item.episodeId,
-                        monitored: newMonitored
-                    },
-                    bubbles: true
-                });
-                this.container.dispatchEvent(event);
-            });
+            // Attach monitor toggle using helper method
+            // For history items, we need to create a pseudo-episode object
+            const pseudoEpisode = {
+                id: item.episodeId,
+                monitored: item.episode ? item.episode.monitored : false
+            };
+            this._attachMonitorToggle(clone, pseudoEpisode);
 
             this.container.appendChild(clone);
         });

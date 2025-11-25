@@ -9,8 +9,8 @@ export function calculateEpisodeQuoteColor(episodeFileCount, totalEpisodeCount, 
     }
 
     let label = ""
-    if (episodeFileCount == totalEpisodeCount)
-        if (status == 'continuing')
+    if (episodeFileCount === totalEpisodeCount)
+        if (status === 'continuing')
             label = episodeQuote['continuing'];
         else
             label = episodeQuote['ended'];

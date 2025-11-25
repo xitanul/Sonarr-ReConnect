@@ -62,37 +62,81 @@ function getInstallationInformation(data) {
  * Save settings to chrome storage
  */
 function save_options() {
-  const apiKey = document.getElementById('apiKey').value;
-  const url = normalizeBaseUrl(document.getElementById('url').value);
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const url = normalizeBaseUrl(document.getElementById('url').value.trim());
   const numberOfDaysCalendar = document.getElementById('numberOfDaysCalendar').value;
   const wantedItems = document.getElementById('wantedItems').value;
   const historyItems = document.getElementById('historyItems').value;
   const backgroundInterval = document.getElementById('backgroundInterval').value;
   let showBadge = document.getElementById('show-badge').checked;
-  if (showBadge == undefined)
+  if (showBadge === undefined) {
     showBadge = false;
+  }
 
-  console.log(showBadge)
+  const status = document.getElementById('status');
+
+  // Input validation
+  const errors = [];
+
+  if (!apiKey) {
+    errors.push('API Key is required');
+  }
+
+  if (!url || url.length < 10) {
+    errors.push('Valid Sonarr URL is required');
+  }
+
+  const numDays = parseInt(numberOfDaysCalendar, 10);
+  if (isNaN(numDays) || numDays < 1 || numDays > 365) {
+    errors.push('Calendar days must be between 1 and 365');
+  }
+
+  const numWanted = parseInt(wantedItems, 10);
+  if (isNaN(numWanted) || numWanted < 1 || numWanted > 100) {
+    errors.push('Wanted items must be between 1 and 100');
+  }
+
+  const numHistory = parseInt(historyItems, 10);
+  if (isNaN(numHistory) || numHistory < 1 || numHistory > 100) {
+    errors.push('History items must be between 1 and 100');
+  }
+
+  const interval = parseInt(backgroundInterval, 10);
+  if (isNaN(interval) || interval < 1 || interval > 1440) {
+    errors.push('Background interval must be between 1 and 1440 minutes (24 hours)');
+  }
+
+  // Display errors if any
+  if (errors.length > 0) {
+    status.textContent = 'Validation errors: ' + errors.join(', ');
+    status.style.color = 'red';
+    setTimeout(() => {
+      status.textContent = '';
+      status.style.color = '';
+    }, 5000);
+    return;
+  }
 
   Settings.set({
     apiKey: apiKey,
     url: url,
-    numberOfDaysCalendar: numberOfDaysCalendar,
-    wantedItems: wantedItems,
-    historyItems: historyItems,
-    backgroundInterval: backgroundInterval,
+    numberOfDaysCalendar: numDays,
+    wantedItems: numWanted,
+    historyItems: numHistory,
+    backgroundInterval: interval,
     sonarrConfig: sonarrConfig,
     showBadge: showBadge,
   }).then(() => {
     chrome.alarms.clear("fetchData", function () {
       chrome.alarms.create("fetchData", { periodInMinutes: Number(backgroundInterval) });
-      console.log(`Alarm "fetchData" updated to new interval: ${backgroundInterval} minutes.`);
+      console.log(`[Options] Alarm "fetchData" updated to interval: ${backgroundInterval} minutes`);
     });
     // Update status to let user know options were saved.
-    var status = document.getElementById('status');
     status.textContent = 'Options saved.';
+    status.style.color = 'green';
     setTimeout(() => {
       status.textContent = '';
+      status.style.color = '';
     }, 750);
   });
 }
@@ -110,7 +154,6 @@ function restore_options() {
     document.getElementById('wantedItems').value = items.wantedItems;
     document.getElementById('historyItems').value = items.historyItems;
     document.getElementById('backgroundInterval').value = items.backgroundInterval;
-    console.log(items);
     if (items.showBadge) {
       document.getElementById("show-badge").checked = true;
     }
