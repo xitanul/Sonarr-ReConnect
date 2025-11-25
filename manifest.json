@@ -10,8 +10,7 @@
   },
   "permissions": [
     "storage",
-    "alarms",
-    "offscreen"
+    "alarms"
   ],
   "action": {
     "default_icon": "72.png",

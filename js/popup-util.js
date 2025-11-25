@@ -1,9 +1,9 @@
 function calculateEpisodeQuoteColor(episodeFileCount, totalEpisodeCount, monitored, status) {
     var episodeQuote = {
-        'continuing' : 'label regular',
-        'ended' : 'label success',
-        'missing-monitored' : 'label alert',
-        'missing-not-monitored' : 'label warning'
+        'continuing': 'label regular',
+        'ended': 'label success',
+        'missing-monitored': 'label alert',
+        'missing-not-monitored': 'label warning'
     }
 
     var label = ""
@@ -23,24 +23,24 @@ function calculateEpisodeQuoteColor(episodeFileCount, totalEpisodeCount, monitor
 //format date to be used in api
 //TODO improve
 function formatDate(date, positiveOffset) {
- if (positiveOffset != null)
-     date.setDate(date.getDate() + parseInt(positiveOffset));
- return (date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + (date.getDate()));
+    if (positiveOffset != null)
+        date.setDate(date.getDate() + parseInt(positiveOffset));
+    return (date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + (date.getDate()));
 }
 
 function getImageUrl(data) {
-  if(typeof data == "object"){
-    var start = data.url.indexOf('MediaCover')
-    var newUrl = app.settings.url + "api/v3/" +  data.url.substring(start) + "&apikey=" + app.settings.apiKey;
-    return newUrl;
-  } else {
-    var noimg = "";
-   return  noimg;
-  }
+    if (typeof data == "object") {
+        var start = data.url.indexOf('MediaCover')
+        var newUrl = normalizeBaseUrl(app.settings.url) + "api/v3/" + data.url.substring(start) + "&apikey=" + app.settings.apiKey;
+        return newUrl;
+    } else {
+        var noimg = "";
+        return noimg;
+    }
 }
 
 //format episodenumbers to match scene formatting
-var formatEpisodeNumer = function(seasonNumber, episodeNumber) {
+var formatEpisodeNumer = function (seasonNumber, episodeNumber) {
     var episodeNum = "S" + (seasonNumber.toString().length === 1 ? '0' : '') + seasonNumber + "E" + (episodeNumber.toString().length === 1 ? '0' : '') + episodeNumber;
     return episodeNum;
 }

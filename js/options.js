@@ -7,16 +7,10 @@
 /**
 * Check if url ends with a /
 */
-function checkUrl(url) {
-
-  if(url.substr(-1) !== '/' && url.length > 7)
-    url = url + '/';
-
-  if(url.indexOf("http://") == -1 && url.indexOf("https://") == -1)
-    url = "http://" + url;
-
-  return url;
-}
+/**
+* Check if url ends with a /
+*/
+// checkUrl function removed, using normalizeBaseUrl from utils.js
 
 //empty sonarrConfig object
 var sonarrConfig = {};
@@ -26,7 +20,7 @@ var sonarrConfig = {};
  */
 function test_connection() {
   var apiKey = document.getElementById('apiKey').value;
-  var url = checkUrl(document.getElementById('url').value);
+  var url = normalizeBaseUrl(document.getElementById('url').value);
   document.getElementById('url').value = url;
   var status = document.getElementById('connectionStatus');
 
@@ -34,24 +28,24 @@ function test_connection() {
   $.ajax({
     url: url + 'api/v3/system/status?apiKey=' + apiKey,
     statusCode: {
-      401: function() {
+      401: function () {
         status.textContent = 'Credentials or url are not correct';
       },
-      404: function() {
+      404: function () {
         status.textContent = 'Sonarr is not running on this address';
       }
     },
-    complete : function(data){
-      if(typeof(data.responseJSON) != "undefined"){
+    complete: function (data) {
+      if (typeof (data.responseJSON) != "undefined") {
         status.textContent = 'Connection successful!';
         getInstallationInformation(data.responseJSON);
         sonarrConfig = data.responseJSON;
-      } else { 
+      } else {
         status.textContent = 'Credentials or url are not correct';
       }
     }
 
-  });	  
+  });
 }
 
 function getInstallationInformation(data) {
@@ -65,35 +59,35 @@ function getInstallationInformation(data) {
  */
 function save_options() {
   var apiKey = document.getElementById('apiKey').value;
-  var url = checkUrl(document.getElementById('url').value);
+  var url = normalizeBaseUrl(document.getElementById('url').value);
   var numberOfDaysCalendar = document.getElementById('numberOfDaysCalendar').value;
   var wantedItems = document.getElementById('wantedItems').value;
   var historyItems = document.getElementById('historyItems').value;
   var backgroundInterval = document.getElementById('backgroundInterval').value;
   var showBadge = $('#show-badge:checked').val();
-  if(showBadge == undefined)
+  if (showBadge == undefined)
     showBadge = false;
-  
+
   console.log(showBadge)
 
-  chrome.storage.sync.set({
+  Settings.set({
     apiKey: apiKey,
     url: url,
-    numberOfDaysCalendar : numberOfDaysCalendar,
-    wantedItems : wantedItems,
-    historyItems : historyItems,
-    backgroundInterval : backgroundInterval,
-    sonarrConfig : sonarrConfig,
-    showBadge : showBadge,
-  }, function() {
-    chrome.alarms.clear("fetchData", function() {
+    numberOfDaysCalendar: numberOfDaysCalendar,
+    wantedItems: wantedItems,
+    historyItems: historyItems,
+    backgroundInterval: backgroundInterval,
+    sonarrConfig: sonarrConfig,
+    showBadge: showBadge,
+  }).then(() => {
+    chrome.alarms.clear("fetchData", function () {
       chrome.alarms.create("fetchData", { periodInMinutes: Number(backgroundInterval) });
       console.log(`Alarm "fetchData" updated to new interval: ${backgroundInterval} minutes.`);
     });
     // Update status to let user know options were saved.
     var status = document.getElementById('status');
     status.textContent = 'Options saved.';
-    setTimeout(function() {
+    setTimeout(function () {
       status.textContent = '';
     }, 750);
   });
@@ -104,15 +98,7 @@ function save_options() {
  */
 function restore_options() {
   // Use default value apiKey = '' and url = https://localhost.
-  chrome.storage.sync.get({
-    apiKey: '',
-    url: 'http://localhost:8989',
-    numberOfDaysCalendar : 7,
-    wantedItems: 15,
-    historyItems: 15,
-    backgroundInterval : 5,
-    showBadge: false
-  }, function(items) {
+  Settings.get().then((items) => {
     document.getElementById('apiKey').value = items.apiKey;
     document.getElementById('url').value = items.url;
     document.getElementById('numberOfDaysCalendar').value = items.numberOfDaysCalendar;
@@ -121,8 +107,8 @@ function restore_options() {
     document.getElementById('historyItems').value = items.historyItems;
     document.getElementById('backgroundInterval').value = items.backgroundInterval;
     console.log(items);
-    if(items.showBadge){ 
-      $("#show-badge").attr("checked",true);
+    if (items.showBadge) {
+      $("#show-badge").attr("checked", true);
     }
   });
 
@@ -131,5 +117,5 @@ function restore_options() {
 
 // add listeners to buttons
 document.addEventListener('DOMContentLoaded', restore_options);
-document.getElementById('save').addEventListener('click',save_options);
-document.getElementById('testConnection').addEventListener('click',test_connection);
+document.getElementById('save').addEventListener('click', save_options);
+document.getElementById('testConnection').addEventListener('click', test_connection);

@@ -2,17 +2,17 @@
  ** Sonnarr Extention
  ** Shows upcoming and missed episodes.
  */
- var sonarr = {
-  settings : {
-    wanted : "api/v3/wanted/missing?page=1&pageSize={wantedItems}&sortKey=airDateUtc&sortDir=desc&includeSeries=true&apikey={apikey}",
-    calendar : "api/v3/calendar?page=1&sortKey=airDateUtc&includeSeries=true&includeEpisode=true&sortDir=desc&start={calendarStartDate}&end={calendarEndDate}&apikey={apikey}",
-    series : "api/v3/series?page=1&sortKey=title&sortDir=desc&apikey={apikey}",
-    episode : "api/v3/episode/\{episodeId}?apikey={apikey}",
-    episodes : "api/v3/episode?seriesId={seriesId}&apikey={apikey}",
-    history : "api/v3/history?page=1&pageSize={historyItems}&sortKey=date&sortDir=desc&includeEpisode=true&includeSeries=true&apikey={apikey}",
-    manualDownload : "/api/v3/release?episodeId={episodeId}&sort_by=releaseWeight&order=asc&apikey={apikey}"
+var sonarr = {
+  settings: {
+    wanted: "api/v3/wanted/missing?page=1&pageSize={wantedItems}&sortKey=airDateUtc&sortDir=desc&includeSeries=true&apikey={apikey}",
+    calendar: "api/v3/calendar?page=1&sortKey=airDateUtc&includeSeries=true&includeEpisode=true&sortDir=desc&start={calendarStartDate}&end={calendarEndDate}&apikey={apikey}",
+    series: "api/v3/series?page=1&sortKey=title&sortDir=desc&apikey={apikey}",
+    episode: "api/v3/episode/{episodeId}?apikey={apikey}",
+    episodes: "api/v3/episode?seriesId={seriesId}&apikey={apikey}",
+    history: "api/v3/history?page=1&pageSize={historyItems}&sortKey=date&sortDir=desc&includeEpisode=true&includeSeries=true&apikey={apikey}",
+    manualDownload: "/api/v3/release?episodeId={episodeId}&sort_by=releaseWeight&order=asc&apikey={apikey}"
   },
-  getData : function(mode, callback, id) {
+  getData: function (mode, callback, id) {
 
     // check input in function
     if (sonarr.settings[mode] === undefined) {
@@ -25,11 +25,13 @@
     }
 
     // check for local data and return the data when possible.
-    if (localStorage.getItem(mode) != "undefined" && mode != 'episode' && mode != 'episodes') {
-      callback($.parseJSON(localStorage.getItem(mode)));
-    }
+    Storage.get(mode).then((cachedData) => {
+      if (cachedData && mode != 'episode' && mode != 'episodes') {
+        callback(cachedData);
+      }
+    });
 
-    var  url = sonarr.settings[mode];
+    var url = sonarr.settings[mode];
 
     url = url.replace("{wantedItems}", app.settings.wantedItems);
     url = url.replace("{historyItems}", app.settings.historyItems);
@@ -40,22 +42,22 @@
     url = url.replace("{seriesId}", id);
     url = url.replace("{episodeId}", id);
 
-    url = app.settings.url + url;
+    url = normalizeBaseUrl(app.settings.url) + url;
 
-    $.getJSON(url, function(remoteData) {
-      localStorage.setItem(mode, JSON.stringify(remoteData));
-      if(app.settings.mode == mode || mode == 'episode' || mode == 'episodes'){
+    $.getJSON(url, function (remoteData) {
+      Storage.set(mode, remoteData);
+      if (app.settings.mode == mode || mode == 'episode' || mode == 'episodes') {
         callback(remoteData);
       }
     });
   },
-  setData : function (mode, data, callback){
+  setData: function (mode, data, callback) {
     var url = sonarr.settings[mode];
     url = url.replace("{seriesId}", data.id);
     url = url.replace("{episodeId}", data.id);
     url = url.replace("{apikey}", app.settings.apiKey);
 
-    url = app.settings.url + url;
+    url = normalizeBaseUrl(app.settings.url) + url;
 
     $.ajax({
       type: "put",
@@ -63,7 +65,7 @@
       data: JSON.stringify(data),
       contentType: "application/json",
       processData: true
-    }).done(function( data ) {
+    }).done(function (data) {
       console.log(data);
 
       if (callback !== undefined && typeof (callback) === "function") {
@@ -71,10 +73,10 @@
       }
     });
   },
-  setEpisodeData: function (episodeData, callback){
+  setEpisodeData: function (episodeData, callback) {
     sonarr.setData('episode', episodeData, callback);
   },
-  setSeasonData : function (seasonData){
+  setSeasonData: function (seasonData, callback) {
     sonarr.setData('season', seasonData, callback);
   }
 
@@ -86,37 +88,37 @@ var create = {
    * monitored, status, episodeQuality, seriesTitle, episodeId, seriesId} * @param mode: string
    * 'app-mode'
    */
-  episode : function(data, mode) {
+  episode: function (data, mode) {
     var html = '';
     // short copy
     var event = {
-      "downloadFolderImported" : 'Imported',
-      "grabbed" : 'Grabbed',
-      "episodeFileDeleted" : 'Deleted',
-      "hide" : '',
+      "downloadFolderImported": 'Imported',
+      "grabbed": 'Grabbed',
+      "episodeFileDeleted": 'Deleted',
+      "hide": '',
       "downloaded": "downloaded",
-      "missing" : 'Missing ',
-      "toBeAired" : '',
-      "downloadFailed" : 'Failed'
+      "missing": 'Missing ',
+      "toBeAired": '',
+      "downloadFailed": 'Failed'
     };
     // add class depening on current status
     var classes = {
-      "downloadFolderImported" : 'label success',
-      "downloaded" : 'label success',
-      "grabbed" : 'label secondary',
-      "episodeFileDeleted" : 'label alert',
-      "hide" : 'hide',
-      "missing" : 'label secondary',
-      "toBeAired" : 'tba',
-      "downloadFailed" : 'label alert'
+      "downloadFolderImported": 'label success',
+      "downloaded": 'label success',
+      "grabbed": 'label secondary',
+      "episodeFileDeleted": 'label alert',
+      "hide": 'hide',
+      "missing": 'label secondary',
+      "toBeAired": 'tba',
+      "downloadFailed": 'label alert'
     };
 
     var episode = $('.templates #episode').clone();
 
     // episodeShowTitle
     if (data.seriesTitle !== null) {
-      episode.find(".series-title").html(data.seriesTitle);
-      episode.find(".series-title").attr('data-series-id', data.seriesId );
+      episode.find(".series-title").text(data.seriesTitle);
+      episode.find(".series-title").attr('data-series-id', data.seriesId);
     } else {
       episode.find(".episode-show-title").addClass(classes['hide']);
     }
@@ -126,26 +128,28 @@ var create = {
     episode.find('.episode, .watched-indicator').attr('data-episode-id', data.id);
 
     // episode title
-    episode.find(".episodenum").html(formatEpisodeNumer(data.seasonNumber, data.episodeNumber));
-    episode.find(".episodename").html(data.title);
+    episode.find(".episodenum").text(formatEpisodeNumer(data.seasonNumber, data.episodeNumber));
+    episode.find(".episodename").text(data.title);
 
     // change font size to fit
     if (data.title.length > 20) {
       episode.find(".episodename").css({
-        'font-size' : '.9rem'
+        'font-size': '.9rem'
       });
     }
 
     // episode info
-    episode.find(".episode-info .status").html(event[data.status]);
+    episode.find(".episode-info .status").text(event[data.status]);
     var aired = moment(new Date(data.airDateUtc)).fromNow();
-    if(data.episodeQuality === undefined){
-      if(aired.indexOf("in") > -1){aired = "Airs " + aired;} else { aired = "Aired " + aired; }
+    if (data.episodeQuality === undefined) {
+      if (aired.indexOf("in") > -1) { aired = "Airs " + aired; } else { aired = "Aired " + aired; }
     }
-    episode.find(".episode-info .date").html(aired);
+    episode.find(".episode-info .date").text(aired);
     // quality
     if (data.episodeQuality !== undefined) {
-      episode.find(".episode-info .episode-info ").prepend("<span class='label secondary'> " + data.episodeQuality + "</span>");
+      var qualitySpan = $('<span class="label secondary"></span>').text(data.episodeQuality);
+      episode.find(".episode-info .episode-info ").prepend(qualitySpan);
+      episode.find(".episode-info .episode-info ").prepend(" ");
     }
     // change classes
     episode.find(".episode-info .status").attr('class', classes[data.status]);
@@ -162,51 +166,51 @@ var create = {
     episode.remove();
     return html;
   },
-  episodeClicks: function (){
-    $('.series-title').unbind('click').on('click', function(){
+  episodeClicks: function () {
+    $('.series-title').unbind('click').on('click', function () {
       var seriesId = $(this).data('series-id');
       getSeries.makeShow(seriesId);
     });
-    $('.watched-indicator').unbind('click').on('click', function(){
+    $('.watched-indicator').unbind('click').on('click', function () {
       var episodeId = $(this).data('episode-id');
       episodeMonitored.set(episodeId);
     });
   },
-  season : function(data) {
+  season: function (data) {
     var html = '';
     return html;
   },
   /*
    * *generate show * @param showdata json {}
    */
-  show : function(showdata) {
+  show: function (showdata) {
     // monitor status
     var episodeQuote = {
-      "continuing" : 'label regular',
-      "ended" : 'label success',
-      "missing-monitored" : 'label alert',
-      'missing-not-monitored' : 'label warning'
+      "continuing": 'label regular',
+      "ended": 'label success',
+      "missing-monitored": 'label alert',
+      'missing-not-monitored': 'label warning'
     }
     var html = '';
     var show = $('.templates .show.template').clone();
     // images
     show.find(".poster img").attr('src', getImageUrl(showdata.images[1]));
-    show.find(".banner").css("background-image", 'url(" '+ getImageUrl(showdata.images[1]) + '")');
+    show.find(".banner").css("background-image", 'url(" ' + getImageUrl(showdata.images[1]) + '")');
 
     // texts
-    show.find("#title").html(showdata.title);
+    show.find("#title").text(showdata.title);
     if (showdata.title.length > 25) {
       show.find("#title").css({
-        'font-size' : '1.3rem'
+        'font-size': '1.3rem'
       });
     }
-    show.find("#network").html(showdata.network);
-    show.find("#start-year").append("Started " + showdata.year);
-    show.find("#show-status").append(showdata.status);
-    show.find("#seasons").append("Seasons " + showdata.statistics.seasonCount);
+    show.find("#network").text(showdata.network);
+    show.find("#start-year").append(document.createTextNode("Started " + showdata.year));
+    show.find("#show-status").append(document.createTextNode(showdata.status));
+    show.find("#seasons").append(document.createTextNode("Seasons " + showdata.statistics.seasonCount));
     show.find("#episodes").html(showdata.statistics.episodeFileCount + "/" + showdata.statistics.episodeCount).attr('class', calculateEpisodeQuoteColor(showdata.statistics.episodeFileCount, showdata.statistics.episodeCount, showdata.monitored, showdata.status));
-    show.find("#air-time").append(showdata.airTime);
-    show.find("#summary").html(showdata.overview);
+    show.find("#air-time").append(document.createTextNode(showdata.airTime));
+    show.find("#summary").text(showdata.overview);
 
     // change html to string and return it.
     html = show.html();
@@ -219,40 +223,40 @@ var create = {
 
 
 var episodeMonitored = {
-  set: function (episodeId){
+  set: function (episodeId) {
     episodeMonitored.getData(episodeId);
 
   },
-  getData: function (episodeId){
+  getData: function (episodeId) {
     console.log('getdata');
     sonarr.getData("episode", episodeMonitored.setData, episodeId)
   },
-  setData: function (data){
+  setData: function (data) {
     console.log('setdata');
-    if(data.monitored){
+    if (data.monitored) {
       data.monitored = false;
     } else {
       data.monitored = true;
     }
     sonarr.setEpisodeData(data, episodeMonitored.updateEpisode);
   },
-  updateEpisode : function(data){
+  updateEpisode: function (data) {
     console.log(data);
-    if(data.monitored == false){
-      $('div.watched-indicator[data-episode-id="'+data.id+'"]').addClass('icon-negative');
+    if (data.monitored == false) {
+      $('div.watched-indicator[data-episode-id="' + data.id + '"]').addClass('icon-negative');
     } else {
-      $('div.watched-indicator[data-episode-id="'+data.id+'"]').removeClass('icon-negative');
+      $('div.watched-indicator[data-episode-id="' + data.id + '"]').removeClass('icon-negative');
     }
   }
 }
 
 
 var getHistory = {
-  connect : function() {
+  connect: function () {
     // check if we have local data
     sonarr.getData("history", getHistory.generate);
   },
-  generate : function(data) {
+  generate: function (data) {
     if (app.settings.mode !== "history") {
       return;
     }
@@ -263,16 +267,16 @@ var getHistory = {
       value = data[key];
       // create data for episode
       props = {
-        episodeNumber : value.episode.episodeNumber,
-        seasonNumber : value.episode.seasonNumber,
-        title : value.episode.title,
-        airDateUtc : value.date,
-        monitored : value.episode.monitored,
-        status : value.eventType,
-        episodeQuality : value.quality.quality.name,
-        id : value.episode.id,
-        seriesTitle : value.series.title,
-        seriesId : value.series.id
+        episodeNumber: value.episode.episodeNumber,
+        seasonNumber: value.episode.seasonNumber,
+        title: value.episode.title,
+        airDateUtc: value.date,
+        monitored: value.episode.monitored,
+        status: value.eventType,
+        episodeQuality: value.quality.quality.name,
+        id: value.episode.id,
+        seriesTitle: value.series.title,
+        seriesId: value.series.id
 
       }
       // getHistory.add(data);
@@ -283,16 +287,16 @@ var getHistory = {
     create.episodeClicks();
 
     //remove history list
-    delete historyList;
+    // delete historyList; // Removed invalid delete
   }
 }
 
 // get calendar of all upcoming shows and seasons
 var getCalendar = {
-  connect : function() {
+  connect: function () {
     sonarr.getData("calendar", getCalendar.generate);
   },
-  generate : function(data) {
+  generate: function (data) {
     if (app.settings.mode !== "calendar") {
       return;
     }
@@ -313,19 +317,19 @@ var getCalendar = {
       episode = data[key];
 
       props = {
-        episodeNumber : episode.episodeNumber,
-        seasonNumber : episode.seasonNumber,
-        title : episode.title,
-        airDateUtc : episode.airDateUtc,
-        monitored : episode.monitored,
-        status : 'toBeAired',
-        seriesTitle : episode.series.title,
-        id : episode.id,
+        episodeNumber: episode.episodeNumber,
+        seasonNumber: episode.seasonNumber,
+        title: episode.title,
+        airDateUtc: episode.airDateUtc,
+        monitored: episode.monitored,
+        status: 'toBeAired',
+        seriesTitle: episode.series.title,
+        id: episode.id,
         seriesId: episode.seriesId,
       }
       //today
       if (new Date(episode.airDateUtc).valueOf() >= new Date().setHours(0, 0, 0, 0).valueOf() && new Date(episode.airDateUtc).valueOf() <= tomorrow.valueOf()) {
-        if(episode.hasFile){
+        if (episode.hasFile) {
           props.status = "downloaded";
         } else {
           props.status = "missing";
@@ -355,14 +359,14 @@ var getCalendar = {
     getCalendar.bind();
     create.episodeClicks();
 
-    delete todayList;
-    delete tomorrowList;
-    delete laterList;
+    // delete todayList;
+    // delete tomorrowList;
+    // delete laterList;
 
     // add wanted list.
     getWantedEpisodes.connect();
   },
-  addDates : function() {
+  addDates: function () {
     var dates = '';
     // TODO improve how to show code
     var template = $('.templates #calendar');
@@ -382,14 +386,14 @@ var getCalendar = {
     template.find('.calendar-date #title').text('Later');
     dates += template.html();
 
-    if($('.list .today').length == 0){
+    if ($('.list .today').length == 0) {
       $('.list').html(dates);
       $('.wanted .calendar-show').hide();
     }
     // $('.list .show').remove();
   },
-  bind : function(value) {
-    $('.calendar-date').unbind('click').click(function() {
+  bind: function (value) {
+    $('.calendar-date').unbind('click').click(function () {
       $(this).parent().find('.calendar-show').toggle();
     });
   }
@@ -397,14 +401,14 @@ var getCalendar = {
 
 // get list of all series and seasons
 var getSeries = {
-  data : {},
+  data: {},
   setData: function (data) {
     getSeries.data = data;
   },
-  connect : function() {
+  connect: function () {
     sonarr.getData("series", getSeries.generate);
   },
-  generate : function(data) {
+  generate: function (data) {
     if (app.settings.mode !== "series") {
       return;
     }
@@ -427,25 +431,25 @@ var getSeries = {
     getSeries.bind();
 
     //remove shows variable
-    delete shows;
+    // delete shows;
   },
 
-  add : function(serie) {
+  add: function (serie) {
     // serie status
     var status = {
-      "continuing" : 'label success',
-      "ended" : 'label alert'
+      "continuing": 'label success',
+      "ended": 'label alert'
     }
     // monitor status
     var monitored = {
-      "true" : 'fi-bookmark',
-      "false" : 'fi-bookmark icon-negative'
+      "true": 'fi-bookmark',
+      "false": 'fi-bookmark icon-negative'
     }
 
     var template = $('.templates #series').clone();
-    template.find('.serie-general #title').html(serie.title);
-    template.find('.serie-general #network').html(serie.network);
-    template.find('.serie-general #status').html(serie.status).attr('class', status[serie.status]);
+    template.find('.serie-general #title').text(serie.title);
+    template.find('.serie-general #network').text(serie.network);
+    template.find('.serie-general #status').text(serie.status).attr('class', status[serie.status]);
     template.find(".serie-general #poster").attr('src', getImageUrl(serie.images[1]));
     template.find(".serie-general #episodesCount").html(serie.statistics.episodeFileCount + "/" + serie.statistics.episodeCount).attr('class', calculateEpisodeQuoteColor(serie.statistics.episodeFileCount, serie.statistics.episodeCount, serie.monitored, serie.status));
 
@@ -459,12 +463,12 @@ var getSeries = {
     }
     return template.html();
   },
-  makeShow : function(seriesId) {
+  makeShow: function (seriesId) {
     var showData = {};
     sonarr.getData("series", getSeries.setData);
 
 
-    if(getSeries.data[0] === undefined){
+    if (getSeries.data[0] === undefined) {
       return;
     }
 
@@ -481,28 +485,28 @@ var getSeries = {
     $(".list").scrollTop(0);
     getEpisodes.forSeries(seriesId);
   },
-  bind : function() {
-    $('.series .serie-general').unbind('click').on('click', function() {
+  bind: function () {
+    $('.series .serie-general').unbind('click').on('click', function () {
       var seriesId = $(this).parent().attr('serie-id');
       getSeries.makeShow(seriesId);
       $(this).parent().find(".serie-seasons").toggle();
     });
     getSeries.filter();
   },
-  filter : function() {
+  filter: function () {
     /*add filter option*/
     var filter = '<input id="series-filter" type="text" placeholder="filter by name">'
     $('.list').prepend(filter);
     $('.row.series').show();
-    $( "#series-filter" ).focus();
-    $( "#series-filter" ).on('input',function(){
+    $("#series-filter").focus();
+    $("#series-filter").on('input', function () {
       var title = $(this).val();
-      if (title == ""){
+      if (title == "") {
         title = "undefinedseriestitle";
       }
-      if($('.row.series[serie-title*='+title+']').length){
+      if ($('.row.series[serie-title*=' + title + ']').length) {
         $('.row.series').hide();
-        $('.row.series[serie-title*='+title+']').show();
+        $('.row.series[serie-title*=' + title + ']').show();
       } else {
         $('.row.series').show();
       }
@@ -512,12 +516,12 @@ var getSeries = {
 
 // get list of all series and seasons
 var getEpisodes = {
-  forSeries : function(seriesId) {
+  forSeries: function (seriesId) {
     app.settings.mode = 'episodes';
 
     sonarr.getData("episodes", getEpisodes.generate, seriesId);
   },
-  generate : function(data) {
+  generate: function (data) {
     // clear list
     $('.list .row.episodes .episode').remove();
     episodes = '';
@@ -528,16 +532,16 @@ var getEpisodes = {
     for (var key in data) {
       episode = data[key];
       props = {
-        episodeNumber : episode.episodeNumber,
-        seasonNumber : episode.seasonNumber,
-        title : episode.title,
-        airDateUtc : episode.airDateUtc,
-        monitored : episode.monitored,
-        status : 'missing',
-        id : episode.id
+        episodeNumber: episode.episodeNumber,
+        seasonNumber: episode.seasonNumber,
+        title: episode.title,
+        airDateUtc: episode.airDateUtc,
+        monitored: episode.monitored,
+        status: 'missing',
+        id: episode.id
       };
 
-      if(episode.hasFile){
+      if (episode.hasFile) {
         props.status = "downloaded";
       }
 
@@ -551,7 +555,7 @@ var getEpisodes = {
 
     for (var key in seasons) {
       season = seasons[key];
-      if(season.seasonNumber != 0)
+      if (season.seasonNumber != 0)
         $('.list .row.episodes #selected-season').prepend('<option value="season-' + season.seasonNumber + '">Season ' + season.seasonNumber + '</option>');
       else
         $('.list .row.episodes #selected-season').prepend('<option value="season-' + season.seasonNumber + '">Specials</option>');
@@ -561,32 +565,32 @@ var getEpisodes = {
     $('.list .row.episodes .episode').hide();
     getEpisodes.bind();
   },
-  bind : function() {
-    $('.list .row.episodes #selected-season').on('change', function() {
+  bind: function () {
+    $('.list .row.episodes #selected-season').on('change', function () {
       $('.list .row.episodes .episode').hide();
       $('.list .row.episodes .episode.' + $(this).val() + '').show();
     });
     $('.list .row.episodes .episode.' + $('.list .row.episodes #selected-season').val()).show();
     create.episodeClicks();
 
-    delete episodes;
+    // delete episodes;
   }
 }
 
 var getWantedEpisodes = {
-  connect : function() {
+  connect: function () {
     sonarr.getData("wanted", getWantedEpisodes.generate);
   },
-  generate : function(data) {
+  generate: function (data) {
     if (app.settings.mode !== "calendar") {
       // return;
     }
     var totalRecords = data.totalRecords.toString();
 
-    if(app.settings.showBadge == "true" || totalRecords > 0) {
-      chrome.action.setBadgeText({text:totalRecords})
+    if (app.settings.showBadge == "true" || totalRecords > 0) {
+      chrome.action.setBadgeText({ text: totalRecords })
     } else {
-      chrome.action.setBadgeText({text: ''});
+      chrome.action.setBadgeText({ text: '' });
     }
 
     data = data.records;
@@ -600,18 +604,18 @@ var getWantedEpisodes = {
     for (var key in data) {
       episode = data[key];
       props = {
-        episodeNumber : episode.episodeNumber,
-        seasonNumber : episode.seasonNumber,
-        title : episode.title,
-        airDateUtc : episode.airDateUtc,
-        monitored : episode.monitored,
-        status : 'missing',
-        seriesTitle : episode.series.title,
-        id : episode.id,
-        seriesId : episode.seriesId
+        episodeNumber: episode.episodeNumber,
+        seasonNumber: episode.seasonNumber,
+        title: episode.title,
+        airDateUtc: episode.airDateUtc,
+        monitored: episode.monitored,
+        status: 'missing',
+        seriesTitle: episode.series.title,
+        id: episode.id,
+        seriesId: episode.seriesId
       }
 
-      if(episode.hasFile){
+      if (episode.hasFile) {
         props.status = "downloaded";
       }
 
@@ -624,20 +628,20 @@ var getWantedEpisodes = {
     create.episodeClicks();
 
     //delete wantedlist from memory
-    delete wantedList;
+    // delete wantedList;
   },
-  searchEpisode : function(episodeId) {
+  searchEpisode: function (episodeId) {
     if (episodeId < 1) {
       return false;
     }
-    var url = app.settings.url + "api/Command?apikey=" + app.settings.apiKey;
+    var url = normalizeBaseUrl(app.settings.url) + "api/Command?apikey=" + app.settings.apiKey;
     console.log(url);
     $.ajax({
-      type : "get",
-      url : url,
-      data : {
-        name : "episodesearch",
-        episodeIds : episodeId
+      type: "get",
+      url: url,
+      data: {
+        name: "episodesearch",
+        episodeIds: episodeId
       }
     });
   }
@@ -646,63 +650,37 @@ var getWantedEpisodes = {
 // set variable from chrome storage option fields
 // stored in chrome.storage.
 // @param callback : function
-function getOptions(callBack) {
-  chrome.storage.sync.get({
-    apiKey: '',
-    url: 'http://localhost:8989',
-    numberOfDaysCalendar : 7,
-    wantedItems: 15,
-    historyItems: 15,
-    calendarEndDate: 7,
-    backgroundInterval : 5,
-    sonarrConfig : {},
-    showBadge : false
-  }, function(items) {
-    console.log('get options from chrome storage');
-    app.settings.apiKey = items.apiKey;
-    app.settings.url = items.url;
-    app.settings.numberOfDaysCalendar = items.numberOfDaysCalendar;
-    app.settings.wantedItems = items.wantedItems;
-    app.settings.historyItems = items.historyItems;
-    app.settings.calendarEndDate = items.calendarEndDate;
-    app.settings.sonarrConfig = items.sonarrConfig;
-    app.settings.backgroundInterval = items.backgroundInterval;
-    app.settings.showBadge = items.showBadge;
-    app.settings.mode = "calendar";
-
-    callBack(items);
-  });
-}
+// getOptions removed, using Settings.get() in app.run
 
 // buttons on menu at the bottom of the extension
 var bottomMenu = {
-  bind : function() {
+  bind: function () {
     $('.bottom-menu a').unbind("click");
     $('#sonarr-url-link').click(bottomMenu.openSonarrUrl);
     $('#options-link').click(bottomMenu.openOptions);
     $('#refresh-link').click(bottomMenu.refreshList);
   },
-  openOptions : function() {
+  openOptions: function () {
     chrome.tabs.create({
-      url : "options.html"
+      url: "options.html"
     });
   },
-  openSonarrUrl : function() {
-    if(!(app.settings.url == "" || app.settings.url.length < 9)){
+  openSonarrUrl: function () {
+    if (!(app.settings.url == "" || app.settings.url.length < 9)) {
       chrome.tabs.create({
-        url : app.settings.url
+        url: app.settings.url
       });
     }
   },
-  refreshList : function() {
+  refreshList: function () {
     app.run();
   }
 }
 
 // buttons on menu at the top of the extension
 var menu = {
-  bind : function() {
-    $('.menu .item').unbind("click").click(function() {
+  bind: function () {
+    $('.menu .item').unbind("click").click(function () {
       var mode = $(this).attr('data-mode');
       if (app.settings.mode !== mode) {
         // change active item
@@ -718,36 +696,40 @@ var menu = {
 }
 
 // save tabs to localstorage for caching
-function prepLocalStorage() {
-  if (localStorage.getItem('wanted') === null) {
-    localStorage.setItem('wanted', undefined);
-  }
-  if (localStorage.getItem('calendar') === null) {
-    localStorage.setItem('calendar', undefined);
-  }
-  if (localStorage.getItem('history') === null) {
-    localStorage.setItem('history', undefined);
-  }
-  if (localStorage.getItem('series') === null) {
-    localStorage.setItem('series', undefined);
+// prepLocalStorage removed, using Storage module
+
+async function migrateLocalStorageToChrome() {
+  const keys = ['wanted', 'calendar', 'history', 'series'];
+  for (const key of keys) {
+    const value = localStorage.getItem(key);
+    if (value && value !== 'undefined') {
+      try {
+        await Storage.set(key, JSON.parse(value));
+        localStorage.removeItem(key);
+        console.log(`Migrated ${key} to chrome.storage.local`);
+      } catch (e) {
+        console.error('Migration failed for', key, e);
+      }
+    }
   }
 }
 
 var app = {
-  settings : {
-    apiKey : '',
-    url : '',
-    mode : 'getOptions',
-    numberOfDaysCalendar : 7,
-    wantedItems : 15,
-    historyItems : 15,
-    calendarEndDate : (new Date() + 7),
-    sonarrConfig : {},
+  settings: {
+    apiKey: '',
+    url: '',
+    mode: 'getOptions',
+    numberOfDaysCalendar: 7,
+    wantedItems: 15,
+    historyItems: 15,
+    calendarEndDate: (new Date() + 7),
+    sonarrConfig: {},
     backgroundInterval: 5
   },
-  run : function() {
+  run: function () {
     // prepare local storage
-    prepLocalStorage();
+    // prepLocalStorage();
+    migrateLocalStorageToChrome();
 
     // bind actions to the menu
     menu.bind();
@@ -755,21 +737,33 @@ var app = {
     bottomMenu.bind();
 
     if (app.settings.mode == 'getOptions') {
-      getOptions(app.run);
+      Settings.get().then((items) => {
+        app.settings.apiKey = items.apiKey;
+        app.settings.url = items.url;
+        app.settings.numberOfDaysCalendar = items.numberOfDaysCalendar;
+        app.settings.wantedItems = items.wantedItems;
+        app.settings.historyItems = items.historyItems;
+        app.settings.calendarEndDate = items.calendarEndDate;
+        app.settings.sonarrConfig = items.sonarrConfig;
+        app.settings.backgroundInterval = items.backgroundInterval;
+        app.settings.showBadge = items.showBadge;
+        app.settings.mode = "calendar";
+        app.run();
+      });
       return false;
     }
 
     //show incase apikey and/or url is not set
-    if(app.settings.apiKey.length < 10 || (app.settings.url == "" || app.settings.url.length < 9)){
+    if (app.settings.apiKey.length < 10 || (app.settings.url == "" || app.settings.url.length < 9)) {
       $(".list").html("<h1>Missing apikey or url please setup config by clicking \"Options\" below</h1>");
       chrome.tabs.create({
-        url : "options.html"
+        url: "options.html"
       });
       return false;
     }
 
     //if we are in the popup view
-    if($(".list").length){
+    if ($(".list").length) {
       if (app.settings.mode === "wanted") {
         getWantedEpisodes.connect();
       } else if (app.settings.mode === "calendar") {
@@ -782,12 +776,12 @@ var app = {
 
     }
   },
-  cleanList : function() {
+  cleanList: function () {
     // clean list
     $(".list *").remove();
   }
 }
-$(document).ready(function(){
+$(document).ready(function () {
   // run app when extension is opened
   app.run();
 });

@@ -1,53 +1,26 @@
+importScripts('utils.js', 'settings.js');
+
 const background = {
   settings: {},
-  init: function() {
-    this.getOptions(() => {
-      this.fetchDataPeriodically();
-      this.listenForAlarms();
-    });
+  init: async function () {
+    this.settings = await Settings.get();
+    this.fetchDataPeriodically();
+    this.listenForAlarms();
   },
-  getOptions: function(callback) {
-    chrome.storage.sync.get({
-      apiKey: '',
-      url: 'http://localhost:8989',
-      numberOfDaysCalendar : 7,
-      wantedItems: 15,
-      historyItems: 15,
-      calendarEndDate: 7,
-      backgroundInterval : 5,
-      sonarrConfig : {},
-      showBadge : false
-    }, (items) => {
-      console.log('get options from chrome storage');
-      this.settings = {
-        apiKey: items.apiKey,
-        url: items.url,
-        numberOfDaysCalendar: items.numberOfDaysCalendar,
-        wantedItems: items.wantedItems,
-        historyItems: items.historyItems,
-        calendarEndDate: items.calendarEndDate,
-        sonarrConfig: items.sonarrConfig,
-        backgroundInterval: items.backgroundInterval,
-        showBadge: items.showBadge,
-        mode: "calendar"
-      };
-      if (typeof callback === "function") {
-        callback.call(this);
-      }
-    });
+  // getOptions removed, using Settings.get() in init and alarms
+  fetchDataPeriodically: function () {
+    chrome.alarms.create("fetchData", { periodInMinutes: Number(this.settings.backgroundInterval) });
   },
-  fetchDataPeriodically: function() {
-    chrome.alarms.create("fetchData", {periodInMinutes: Number(this.settings.backgroundInterval)});
-  },
-  listenForAlarms: function() {
-    chrome.alarms.onAlarm.addListener((alarm) => {
+  listenForAlarms: function () {
+    chrome.alarms.onAlarm.addListener(async (alarm) => {
       if (alarm.name === "fetchData") {
-        this.getOptions(this.fetchData.bind(this));
+        this.settings = await Settings.get();
+        this.fetchData();
       }
     });
   },
-  fetchData: async function() {
-    const baseUrl = this.settings.url;
+  fetchData: async function () {
+    const baseUrl = normalizeBaseUrl(this.settings.url);
     const apikey = this.settings.apiKey;
     const wantedItems = this.settings.wantedItems;
     const url = `${baseUrl}api/v3/wanted/missing?page=1&pageSize=${wantedItems}&sortKey=airDateUtc&sortDir=desc&includeSeries=true&apikey=${apikey}`;
@@ -60,8 +33,8 @@ const background = {
       console.error('Fetch error:', error);
     }
   },
-  updateBadge: function(text) {
-    if (text && this.settings.showBadge === "true" || parseInt(text, 10) > 0) {
+  updateBadge: function (text) {
+    if (text && (this.settings.showBadge === "true" || parseInt(text, 10) > 0)) {
       chrome.action.setBadgeText({ text: text.toString() });
     } else {
       chrome.action.setBadgeText({ text: '' });
@@ -69,15 +42,6 @@ const background = {
   }
 };
 
-async function createOffscreen() {
-  await chrome.offscreen.createDocument({
-    url: 'offscreen.html',
-    reasons: ['BLOBS'],
-    justification: 'keep service worker running',
-  }).catch(() => {});
-}
-chrome.runtime.onStartup.addListener(createOffscreen);
-self.onmessage = e => {};
-createOffscreen();
+// Offscreen document removed in favor of chrome.alarms
 
 background.init();
