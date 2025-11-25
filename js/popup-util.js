@@ -52,9 +52,12 @@ export function formatDate(date, positiveOffset) {
 }
 
 export function getImageUrl(data, baseUrl, apiKey) {
-    if (typeof data == "object") {
+    if (typeof data === "object") {
         const start = data.url.indexOf('MediaCover')
-        const newUrl = normalizeBaseUrl(baseUrl) + "api/v3/" + data.url.substring(start);
+        // Note: Image URLs must use query parameter for authentication
+        // because <img> tags cannot send custom headers
+        // Use & because the URL already contains query parameters
+        const newUrl = normalizeBaseUrl(baseUrl) + "api/v3/" + data.url.substring(start) + "&apikey=" + apiKey;
         return newUrl;
     } else {
         const noimg = "";
