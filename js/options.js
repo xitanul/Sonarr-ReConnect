@@ -58,7 +58,7 @@ async function test_connection() {
       status.textContent = 'Connection failed: ' + error.message;
     }
     status.style.color = 'red';
-    console.error('[Options] Connection test failed:', error);
+    console.log('[Background] Fetch error:', error);
   }
 }
 

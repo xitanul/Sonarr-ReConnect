@@ -67,7 +67,7 @@ const app = {
             // Deselect menu items
             document.querySelectorAll('.menu .item').forEach(el => el.classList.remove('active'));
         } catch (error) {
-            console.error('Error loading show:', error);
+            console.log('Error loading show:', error);
             const message = ErrorHandler.getUserMessage(error);
             ErrorHandler.showErrorState(this.ui.container, message, () => this.loadShow(seriesId));
         }
@@ -109,7 +109,7 @@ const app = {
                 this.render(mode, data);
             }
         } catch (error) {
-            console.error('Error loading data:', error);
+            console.log('Error loading data:', error);
             const message = ErrorHandler.getUserMessage(error);
             ErrorHandler.showErrorState(this.ui.container, message, () => this.load(mode));
         }

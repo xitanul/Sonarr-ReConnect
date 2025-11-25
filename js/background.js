@@ -38,7 +38,7 @@ const background = {
       const numMissingEpisodes = data.totalRecords;
       this.updateBadge(numMissingEpisodes.toString());
     } catch (error) {
-      console.error('[Background] Fetch error:', error);
+      console.log('[Background] Fetch error:', error);
       // Set badge to error indicator
       chrome.action.setBadgeText({ text: '!' });
       chrome.action.setBadgeBackgroundColor({ color: '#e74c3c' });
