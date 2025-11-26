@@ -70,8 +70,21 @@ const app = {
         });
 
         this.ui.container.addEventListener('toggle-monitor', (e) => {
-            this.api.toggleEpisodeMonitor([e.detail.episodeId], e.detail.monitored)
-                .catch(err => console.error(err));
+            const { episodeId, monitored, toggleElement } = e.detail;
+            this.api.toggleEpisodeMonitor([episodeId], monitored)
+                .catch(err => {
+                    console.error(err);
+                    // Revert optimistic toggle on failure
+                    if (toggleElement) {
+                        if (monitored) {
+                            toggleElement.classList.add('icon-negative');
+                        } else {
+                            toggleElement.classList.remove('icon-negative');
+                        }
+                    }
+                    const message = ErrorHandler.getUserMessage(err);
+                    ErrorHandler.showToast(message);
+                });
         });
     },
 

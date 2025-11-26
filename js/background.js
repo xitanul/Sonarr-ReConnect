@@ -24,7 +24,7 @@ const background = {
   },
   listenForStorageChanges: function () {
     chrome.storage.onChanged.addListener(async (changes, namespace) => {
-      if (namespace === 'local' && (changes.url || changes.apiKey || changes.wantedItems || changes.showBadge)) {
+      if (namespace === 'sync' && (changes.url || changes.apiKey || changes.wantedItems || changes.showBadge)) {
         this.settings = await Settings.get();
         this.fetchData();
       }
@@ -61,8 +61,6 @@ const background = {
       const data = await response.json();
       const numMissingEpisodes = data.totalRecords;
       this.updateBadge(numMissingEpisodes.toString());
-      // Reset badge color to transparent/default on success
-      chrome.action.setBadgeBackgroundColor({ color: [0, 0, 0, 0] });
     } catch (error) {
       console.log('[Background] Fetch error:', error);
       // Set badge to error indicator ONLY if showBadge is true
@@ -77,8 +75,10 @@ const background = {
   updateBadge: function (text) {
     if (this.settings.showBadge && text && parseInt(text, 10) > 0) {
       chrome.action.setBadgeText({ text: text.toString() });
+      chrome.action.setBadgeBackgroundColor({ color: '#1565C0' }); // keep text visible
     } else {
       chrome.action.setBadgeText({ text: '' });
+      chrome.action.setBadgeBackgroundColor({ color: [0, 0, 0, 0] });
     }
   }
 };

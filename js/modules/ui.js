@@ -47,7 +47,8 @@ export class UI {
             const event = new CustomEvent('toggle-monitor', {
                 detail: {
                     episodeId: episode.id,
-                    monitored: newMonitored
+                    monitored: newMonitored,
+                    toggleElement: monitorIcon
                 },
                 bubbles: true
             });
