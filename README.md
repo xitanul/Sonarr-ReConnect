@@ -13,12 +13,19 @@ The extension gives the ability to show Sonarr activities like: History, Wanted/
 
 ## What's New in v3.0.0
 
-### Architecture & Refactoring (Phases 1-3)
-
+### Architecture & Refactoring
 *   **jQuery Removal**: Completely removed jQuery dependency, rewriting all DOM manipulation and AJAX calls using native Vanilla JS and Fetch API.
 *   **Modular Codebase**: Refactored the monolithic `popup.js` into a modern, modular architecture using ES Modules (`modules/sonarr-api.js`, `modules/ui.js`, etc.) for better maintainability.
 
+### UI Polish & Enhancements
+*   **Visual Fidelity**: Restored original design aesthetics with precise padding, alignment, and font sizing in Calendar and History views.
+*   **History View**: Optimized layout to prevent text wrapping and ensure consistent single-line display for all items.
+*   **Calendar View**: Improved spacing and alignment for better readability.
+
 ### Fixes & Improvements
+*   **Badge Behavior**: Fixed badge error handling to respect user settings and enabled it by default.
+*   **Permissions**: Added necessary host permissions to ensure reliable connectivity with Sonarr instances.
+*   **Performance**: Added initial fetch on load to show data immediately without waiting for the first background interval.
 *   **List Visibility**: Fixed an issue where the last series in the list was cut off by the bottom menu.
 
 ## Setup

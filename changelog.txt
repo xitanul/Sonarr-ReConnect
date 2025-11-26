@@ -4,6 +4,10 @@ Complete Modernization and Modular Architecture
 - Replaced jQuery with native DOM/Fetch APIs
 - Modularized codebase for better maintainability
 - Restored original visual fidelity and fixed list visibility
+- UI Polish: Restored original visual design and alignment in Calendar/History
+- UI Polish: Fixed text wrapping issues in History tab
+- Fix: Fixed badge behavior and permissions
+- Fix: Improved initial data loading
 
 2.0.0
 Add support for Sonarr v3 API, used in Sonarr v3 and v4
