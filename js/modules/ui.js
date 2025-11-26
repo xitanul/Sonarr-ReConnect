@@ -362,4 +362,42 @@ export class UI {
 
         return clone;
     }
+    renderPermissionRequest(url, callback) {
+        this.clear();
+
+        const container = document.createElement('div');
+        container.className = 'permission-request';
+        container.style.padding = '20px';
+        container.style.textAlign = 'center';
+
+        const icon = document.createElement('i');
+        icon.className = 'fi-shield';
+        icon.style.fontSize = '48px';
+        icon.style.color = '#e67e22';
+        container.appendChild(icon);
+
+        const title = document.createElement('h4');
+        title.textContent = 'Permission Required';
+        title.style.marginTop = '10px';
+        container.appendChild(title);
+
+        const message = document.createElement('p');
+        message.textContent = `To improve security, Sonarr ReConnect now requires explicit permission to access your Sonarr server at:`;
+        container.appendChild(message);
+
+        const urlEl = document.createElement('code');
+        urlEl.textContent = url;
+        urlEl.style.display = 'block';
+        urlEl.style.margin = '10px 0';
+        urlEl.style.wordBreak = 'break-all';
+        container.appendChild(urlEl);
+
+        const button = document.createElement('button');
+        button.className = 'button expand';
+        button.textContent = 'Grant Permission';
+        button.addEventListener('click', callback);
+        container.appendChild(button);
+
+        this.container.appendChild(container);
+    }
 }

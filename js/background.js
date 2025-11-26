@@ -35,6 +35,20 @@ const background = {
     const apikey = this.settings.apiKey;
     const wantedItems = this.settings.wantedItems;
     const url = `${baseUrl}api/v3/wanted/missing?page=1&pageSize=${wantedItems}&sortKey=airDateUtc&sortDir=desc&includeSeries=true`;
+
+    // Check permissions first
+    const origin = new URL(baseUrl).origin + '/*';
+    const hasPermission = await new Promise(resolve => {
+      chrome.permissions.contains({ origins: [origin] }, resolve);
+    });
+
+    if (!hasPermission) {
+      console.log('[Background] Missing permission for:', origin);
+      chrome.action.setBadgeText({ text: 'PERM' });
+      chrome.action.setBadgeBackgroundColor({ color: '#e67e22' }); // Orange for warning
+      return;
+    }
+
     try {
       const response = await fetch(url, {
         headers: {
@@ -47,11 +61,8 @@ const background = {
       const data = await response.json();
       const numMissingEpisodes = data.totalRecords;
       this.updateBadge(numMissingEpisodes.toString());
-      chrome.action.setBadgeBackgroundColor({ color: '#0000FF' }); // Reset to default blue (or whatever default is preferred, usually browser default is blue-ish but explicit is safer if we change it elsewhere)
-      // Actually, standard behavior is to just clear it if we want default, but we might want a specific color.
-      // Let's just remove the red background by setting it to null or a default color.
-      // Chrome default is usually blue. Let's strictly follow the plan: "reset the badge background color on recovery"
-      chrome.action.setBadgeBackgroundColor({ color: [0, 0, 0, 0] }); // Transparent/Default
+      // Reset badge color to transparent/default on success
+      chrome.action.setBadgeBackgroundColor({ color: [0, 0, 0, 0] });
     } catch (error) {
       console.log('[Background] Fetch error:', error);
       // Set badge to error indicator ONLY if showBadge is true

@@ -127,27 +127,38 @@ function save_options() {
     return;
   }
 
-  Settings.set({
-    apiKey: apiKey,
-    url: url,
-    numberOfDaysCalendar: numDays,
-    wantedItems: numWanted,
-    historyItems: numHistory,
-    backgroundInterval: interval,
-    sonarrConfig: sonarrConfig,
-    showBadge: showBadge,
-  }).then(() => {
-    chrome.alarms.clear("fetchData", function () {
-      chrome.alarms.create("fetchData", { periodInMinutes: Number(backgroundInterval) });
-      console.log(`[Options] Alarm "fetchData" updated to interval: ${backgroundInterval} minutes`);
-    });
-    // Update status to let user know options were saved.
-    status.textContent = 'Options saved.';
-    status.style.color = 'green';
-    setTimeout(() => {
-      status.textContent = '';
-      status.style.color = '';
-    }, 750);
+  // Request permission for the new URL
+  const origin = new URL(url).origin + '/*';
+  chrome.permissions.request({
+    origins: [origin]
+  }, (granted) => {
+    if (granted) {
+      Settings.set({
+        apiKey: apiKey,
+        url: url,
+        numberOfDaysCalendar: numDays,
+        wantedItems: numWanted,
+        historyItems: numHistory,
+        backgroundInterval: interval,
+        sonarrConfig: sonarrConfig,
+        showBadge: showBadge,
+      }).then(() => {
+        chrome.alarms.clear("fetchData", function () {
+          chrome.alarms.create("fetchData", { periodInMinutes: Number(backgroundInterval) });
+          console.log(`[Options] Alarm "fetchData" updated to interval: ${backgroundInterval} minutes`);
+        });
+        // Update status to let user know options were saved.
+        status.textContent = 'Options saved and permission granted.';
+        status.style.color = 'green';
+        setTimeout(() => {
+          status.textContent = '';
+          status.style.color = '';
+        }, 750);
+      });
+    } else {
+      status.textContent = 'Error: Permission not granted. Settings not saved.';
+      status.style.color = 'red';
+    }
   });
 }
 

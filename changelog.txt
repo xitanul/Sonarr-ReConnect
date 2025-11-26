@@ -1,4 +1,10 @@
 Version log
+3.0.2
+Security Hardening
+- Restricted site access permissions to user-configured Sonarr URL only
+- Added migration flow for existing users to re-grant permissions
+- Removed broad "All Sites" access from manifest
+
 3.0.1
 UI Polish & Bug Fixes
 - Fixed badge behavior and error handling

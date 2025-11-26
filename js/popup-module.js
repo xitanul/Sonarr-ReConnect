@@ -19,6 +19,26 @@ const app = {
         this.ui = new UI(this.settings);
         this.api = new SonarrApi(this.settings);
 
+        // Check permissions
+        if (this.settings.url) {
+            const origin = new URL(this.settings.url).origin + '/*';
+            const hasPermission = await new Promise(resolve => {
+                chrome.permissions.contains({ origins: [origin] }, resolve);
+            });
+
+            if (!hasPermission) {
+                this.ui.renderPermissionRequest(this.settings.url, () => {
+                    chrome.permissions.request({ origins: [origin] }, (granted) => {
+                        if (granted) {
+                            // Reload to start fresh
+                            this.init();
+                        }
+                    });
+                });
+                return;
+            }
+        }
+
         this.bindMenu();
         this.load(this.settings.mode || 'calendar');
     },

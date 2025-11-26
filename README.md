@@ -11,6 +11,12 @@ The extension gives the ability to show Sonarr activities like: History, Wanted/
 *   **Quick Navigation**: Jump to series details from any view.
 *   **Badge Notifications**: See the count of wanted/missing episodes on the extension icon.
 
+## What's New in v3.0.2
+
+### Security Hardening
+*   **Restricted Access**: The extension now adheres to the Principle of Least Privilege, requesting access ONLY to your specific Sonarr URL.
+*   **Migration Flow**: Added a user-friendly migration UI to help existing users re-grant permissions after the security update.
+
 ## What's New in v3.0.1
 
 ### Architecture & Refactoring (Phases 1-3)
