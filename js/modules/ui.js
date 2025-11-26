@@ -270,6 +270,7 @@ export class UI {
         historyList.forEach(item => {
             const clone = this.templates.episode.content.cloneNode(true);
             const el = clone.querySelector('.episode');
+            el.classList.add('history-item');
 
             const seriesTitleEl = el.querySelector('.series-title');
             seriesTitleEl.textContent = item.series?.title || 'Unknown Series';
@@ -279,7 +280,7 @@ export class UI {
             if (item.episode) {
                 el.querySelector('.episodenum').textContent = formatEpisodeNumer(item.episode.seasonNumber, item.episode.episodeNumber);
             }
-            el.querySelector('.date').textContent = getRelativeTime(item.date);
+            el.querySelector('.date').textContent = getRelativeTime(item.date, false);
 
             // Map event type to display name
             const eventType = HISTORY_EVENT_TYPES[item.eventType] || item.eventType;

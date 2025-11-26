@@ -32,13 +32,13 @@ export function normalizeBaseUrl(url) {
 /**
  * Get relative time string (e.g. "in 2 days", "5 minutes ago")
  * Replaces moment(date).fromNow()
- * @param {string} dateString - ISO date string to compare against current time
+ * @param {boolean} [prefix=true] - Whether to include "Airs"/"Aired" prefix
  * @returns {string} Human-readable relative time string
  * @example
- * getRelativeTime('2024-12-25T00:00:00Z') // 'in 30 days'
- * getRelativeTime('2024-11-20T12:00:00Z') // '4 days ago'
+ * getRelativeTime('2024-12-25T00:00:00Z') // 'Airs in 30 days'
+ * getRelativeTime('2024-11-20T12:00:00Z', false) // '4 days ago'
  */
-export function getRelativeTime(dateString) {
+export function getRelativeTime(dateString, prefix = true) {
   const date = new Date(dateString);
   const now = new Date();
   const diffMs = date - now;
@@ -56,6 +56,10 @@ export function getRelativeTime(dateString) {
   else timeStr = "a few seconds";
 
   const relativeStr = isFuture ? `in ${timeStr}` : `${timeStr} ago`;
+
+  if (!prefix) {
+    return relativeStr;
+  }
 
   // Add prefix based on original extension behavior
   if (isFuture) {

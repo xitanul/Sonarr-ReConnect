@@ -8,7 +8,7 @@ export const Settings = {
         calendarEndDate: 7,
         backgroundInterval: 5,
         sonarrConfig: {},
-        showBadge: false
+        showBadge: true
     },
 
     get() {

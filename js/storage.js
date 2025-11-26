@@ -2,7 +2,7 @@ export const Storage = {
     get(key) {
         return new Promise((resolve) => {
             chrome.storage.local.get(key, (result) => {
-                resolve(result[key] || null);
+                resolve(result[key] !== undefined ? result[key] : null);
             });
         });
     },

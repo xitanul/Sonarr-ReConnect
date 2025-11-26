@@ -12,6 +12,10 @@
     "storage",
     "alarms"
   ],
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
   "action": {
     "default_icon": "72.png",
     "default_popup": "popup.html"

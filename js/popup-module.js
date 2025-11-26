@@ -94,7 +94,7 @@ const app = {
                 data = { calendar, wanted: wanted.records };
 
                 // Update badge
-                if (wanted.totalRecords !== undefined) {
+                if (wanted.totalRecords !== undefined && this.settings.showBadge) {
                     const text = wanted.totalRecords > 0 ? wanted.totalRecords.toString() : '';
                     chrome.action.setBadgeText({ text: text });
                 }
