@@ -462,9 +462,6 @@ p {
   border: 1px solid #ccc;
   font-weight: bold;
   border-radius: 3px;
-  padding: 0.1rem 0.4rem;
-  font-size: 0.7rem;
-  /* Match original size */
 }
 
 .label.quality {
@@ -473,7 +470,6 @@ p {
   border: none;
   font-weight: bold;
   border-radius: 3px;
-  padding: 0.1rem 0.4rem;
 }
 
 .label.grabbed {
@@ -482,49 +478,42 @@ p {
   border: none;
   font-weight: bold;
   border-radius: 3px;
-  padding: 0.1rem 0.4rem;
 }
 
 .label.downloadFolderImported {
   background-color: #43ac6a;
   color: white;
   border-radius: 3px;
-  padding: 0.1rem 0.4rem;
 }
 
 .label.downloadFailed {
   background-color: #f04124;
   color: white;
   border-radius: 3px;
-  padding: 0.1rem 0.4rem;
 }
 
 .label.episodeFileDeleted {
   background-color: #c82333;
   color: white;
   border-radius: 3px;
-  padding: 0.1rem 0.4rem;
 }
 
 .label.episodeFileRenamed {
   background-color: #17a2b8;
   color: white;
   border-radius: 3px;
-  padding: 0.1rem 0.4rem;
 }
 
 .label.downloadIgnored {
   background-color: #6c757d;
   color: white;
   border-radius: 3px;
-  padding: 0.1rem 0.4rem;
 }
 
 .label.seriesFolderImported {
   background-color: #28a745;
   color: white;
   border-radius: 3px;
-  padding: 0.1rem 0.4rem;
 }
 
 .label:empty {

@@ -1,4 +1,8 @@
 Version log
+3.0.3
+UI Polish
+- Standardized height and padding of status labels in Calendar view
+
 3.0.2
 Security Hardening
 - Restricted site access permissions to user-configured Sonarr URL only
