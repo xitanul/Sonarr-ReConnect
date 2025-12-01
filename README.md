@@ -11,6 +11,11 @@ The extension gives the ability to show Sonarr activities like: History, Wanted/
 *   **Quick Navigation**: Jump to series details from any view.
 *   **Badge Notifications**: See the count of wanted/missing episodes on the extension icon.
 
+## What's New in v3.0.4
+
+### UI Fixes
+*   **Navigation Gap Fix**: Removed unwanted gap between the tab navigation and content area, restoring the original compact layout.
+
 ## What's New in v3.0.2
 
 ### Security Hardening

@@ -55,11 +55,12 @@ html {
 }
 
 .list {
+  margin-top: -10px;
   overflow-y: auto;
   overflow-x: hidden;
   height: 526px;
   display: block;
-  margin-top: 0;
+
   padding-bottom: 3rem;
 }
 
@@ -366,7 +367,7 @@ p {
 
 .episode .episode-meta {
   padding: 0 0.5rem 0 0;
-  margin-top: 0;
+
   margin-bottom: .5rem;
   font-size: .8rem;
 }
@@ -378,7 +379,7 @@ p {
 
 .history-item .episode-meta {
   padding-left: 0;
-  margin-top: 0;
+
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
