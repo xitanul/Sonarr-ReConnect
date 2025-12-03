@@ -152,7 +152,7 @@ export class UI {
                 this.container.dispatchEvent(event);
             });
 
-            el.querySelector('#network').textContent = serie.network;
+            el.querySelector('#network').textContent = serie.network || '';
 
             const statusMap = {
                 'continuing': 'label success',
@@ -160,11 +160,16 @@ export class UI {
             };
             const statusClass = statusMap[serie.status] || 'label secondary';
             el.querySelector('#status').className = statusClass;
-            el.querySelector('#status').textContent = serie.status;
+            el.querySelector('#status').textContent = serie.status || 'unknown';
 
             const epCount = el.querySelector('#episodesCount');
-            epCount.textContent = `${serie.statistics.episodeFileCount}/${serie.statistics.episodeCount}`;
-            epCount.className = calculateEpisodeQuoteColor(serie.statistics.episodeFileCount, serie.statistics.episodeCount, serie.monitored, serie.status);
+            if (serie.statistics) {
+                epCount.textContent = `${serie.statistics.episodeFileCount}/${serie.statistics.episodeCount}`;
+                epCount.className = calculateEpisodeQuoteColor(serie.statistics.episodeFileCount, serie.statistics.episodeCount, serie.monitored, serie.status);
+            } else {
+                epCount.textContent = '?/?';
+                epCount.className = 'label secondary';
+            }
 
             // Handle image
             const poster = el.querySelector('#poster');

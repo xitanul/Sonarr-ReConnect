@@ -113,7 +113,14 @@ const app = {
         try {
             const cached = await Storage.get(mode);
             if (cached) {
-                this.render(mode, cached);
+                try {
+                    this.render(mode, cached);
+                } catch (renderError) {
+                    console.warn('[Popup] Failed to render cached data, will use fresh data:', renderError);
+                    // Clear corrupted cache
+                    await Storage.remove(mode);
+                    this.ui.showLoader(); // Show loader again since render failed
+                }
             }
 
             let data;
@@ -133,6 +140,18 @@ const app = {
                 }
             } else if (mode === 'series') {
                 data = await this.api.getSeries();
+
+                // Validate series data before caching
+                // Some series may not have statistics (unmonitored, newly added, etc.) - this is normal
+                // Don't cache if ANY series lack statistics to avoid inconsistent cache state
+                if (data && Array.isArray(data)) {
+                    const allValid = data.every(serie => serie && serie.statistics);
+                    if (!allValid) {
+                        // Don't cache incomplete data, but still render it (defensive rendering handles it)
+                        this.render(mode, data);
+                        return; // Skip the normal cache + render flow
+                    }
+                }
             } else if (mode === 'history') {
                 data = await this.api.getHistory(1, this.settings.historyItems);
             }

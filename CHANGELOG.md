@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.5] - 2025-12-02
+
+### Fixed
+- Fixed Series tab crash when network transitions result in incomplete API data
+- Added defensive null checks to handle series without statistics gracefully
+- Implemented cache validation to prevent storing incomplete data
+- Added automatic cache recovery for corrupted data
+
 ## [3.0.4] - 2025-11-30
 
 ### Fixed

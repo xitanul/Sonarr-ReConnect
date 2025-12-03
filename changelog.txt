@@ -1,4 +1,14 @@
 Version log
+3.0.5
+Bug Fix
+- Fixed Series tab crash when API returns incomplete data after network transitions
+- Added defensive rendering to gracefully handle series without statistics
+- Improved cache validation and automatic error recovery
+
+3.0.4
+UI Polish
+- Removed unwanted gap between tab navigation and content area
+
 3.0.3
 UI Polish
 - Standardized height and padding of status labels in Calendar view
