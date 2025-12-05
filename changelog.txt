@@ -1,4 +1,10 @@
 Version log
+3.0.6
+Security & Polish
+- Removed hardcoded external URL for banner images
+- Refactored styling and optimized UI rendering
+- Improved refresh UX
+
 3.0.5
 Bug Fix
 - Fixed Series tab crash when API returns incomplete data after network transitions

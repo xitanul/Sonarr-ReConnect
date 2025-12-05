@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.6] - 2025-12-04
+
+### Security
+- Removed hardcoded external URL for banner images, now loading dynamically from user's Sonarr instance
+
+### Changed
+- Refactored JavaScript styling to CSS classes for better maintainability
+- Optimized UI rendering to prevent duplicate elements
+- Improved refresh UX to be less intrusive
+
 ## [3.0.5] - 2025-12-02
 
 ### Fixed

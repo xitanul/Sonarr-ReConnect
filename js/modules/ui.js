@@ -122,24 +122,33 @@ export class UI {
 
     renderSeries(seriesList) {
         // Filter input
-        const filterRow = document.createElement('div');
-        filterRow.className = 'row collapse';
-        filterRow.style.padding = '0.5rem';
-        filterRow.innerHTML = '<input type="text" placeholder="filter by name" style="margin:0;">';
-        this.container.appendChild(filterRow);
+        // Filter input
+        let filterRow = this.container.querySelector('.filter-row');
+        if (!filterRow) {
+            filterRow = document.createElement('div');
+            filterRow.className = 'row collapse filter-row';
+            filterRow.style.padding = '0.5rem';
+            filterRow.innerHTML = '<input type="text" placeholder="filter by name" style="margin:0;">';
+            this.container.appendChild(filterRow);
+
+            const input = filterRow.querySelector('input');
+            input.addEventListener('keyup', () => {
+                const term = input.value.toLowerCase();
+                const items = this.container.querySelectorAll('.series');
+                items.forEach(item => {
+                    const title = item.querySelector('.series-title').textContent.toLowerCase();
+                    item.style.display = title.includes(term) ? 'block' : 'none';
+                });
+            });
+        } else {
+            // Ensure it's visible and cleared if needed, or just leave as is
+            filterRow.style.display = 'block';
+        }
 
         const listContainer = document.createElement('div');
         this.container.appendChild(listContainer);
 
-        const input = filterRow.querySelector('input');
-        input.addEventListener('keyup', () => {
-            const term = input.value.toLowerCase();
-            const items = listContainer.querySelectorAll('.series');
-            items.forEach(item => {
-                const title = item.querySelector('.series-title').textContent.toLowerCase();
-                item.style.display = title.includes(term) ? 'block' : 'none';
-            });
-        });
+
 
         seriesList.sort(seriesComparator);
         seriesList.forEach(serie => {
@@ -194,6 +203,9 @@ export class UI {
         if (fanart) {
             const bannerUrl = getImageUrl(fanart, this.settings.url, this.settings.apiKey);
             showEl.querySelector('.banner').style.backgroundImage = `url('${bannerUrl}')`;
+        } else {
+            // Fallback or hide if no fanart
+            showEl.querySelector('.banner').style.backgroundImage = 'none';
         }
 
         // Poster
@@ -204,8 +216,6 @@ export class UI {
         }
 
         showEl.querySelector('#title').textContent = series.title;
-        // showEl.querySelector('#network').textContent = series.network; // Template uses #network inside h6?
-        // Template: <span id="network" class="network label secondary round"></span>
         showEl.querySelector('#network').textContent = series.network;
 
         showEl.querySelector('#show-status').innerHTML = `<i class="fi-play"></i> ${series.status}`;
@@ -337,7 +347,7 @@ export class UI {
 
         // Font size adjustment (logic from original popup.js)
         if (episode.title.length > 20) {
-            el.querySelector('.episodename').style.fontSize = '12px';
+            el.querySelector('.episodename').classList.add('long-title');
         }
 
         // Status logic

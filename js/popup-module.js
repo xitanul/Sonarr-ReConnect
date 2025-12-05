@@ -108,7 +108,10 @@ const app = {
 
     async load(mode) {
         this.currentMode = mode;
-        this.ui.showLoader();
+        // Only show loader if we don't have data visible (approximate check)
+        if (this.ui.container.children.length === 0 || this.ui.container.querySelector('.load')) {
+            this.ui.showLoader();
+        }
 
         try {
             const cached = await Storage.get(mode);

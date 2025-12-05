@@ -10,7 +10,6 @@ const background = {
     this.listenForStorageChanges();
     this.fetchData(); // Initial fetch
   },
-  // getOptions removed, using Settings.get() in init and alarms
   fetchDataPeriodically: function () {
     chrome.alarms.create("fetchData", { periodInMinutes: Number(this.settings.backgroundInterval) });
   },
@@ -82,7 +81,5 @@ const background = {
     }
   }
 };
-
-// Offscreen document removed in favor of chrome.alarms
 
 background.init();
