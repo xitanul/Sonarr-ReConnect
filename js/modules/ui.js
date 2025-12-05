@@ -122,7 +122,6 @@ export class UI {
 
     renderSeries(seriesList) {
         // Filter input
-        // Filter input
         let filterRow = this.container.querySelector('.filter-row');
         if (!filterRow) {
             filterRow = document.createElement('div');
@@ -383,18 +382,13 @@ export class UI {
 
         const container = document.createElement('div');
         container.className = 'permission-request';
-        container.style.padding = '20px';
-        container.style.textAlign = 'center';
 
         const icon = document.createElement('i');
-        icon.className = 'fi-shield';
-        icon.style.fontSize = '48px';
-        icon.style.color = '#e67e22';
+        icon.className = 'fi-shield shield-icon';
         container.appendChild(icon);
 
         const title = document.createElement('h4');
         title.textContent = 'Permission Required';
-        title.style.marginTop = '10px';
         container.appendChild(title);
 
         const message = document.createElement('p');
@@ -403,9 +397,6 @@ export class UI {
 
         const urlEl = document.createElement('code');
         urlEl.textContent = url;
-        urlEl.style.display = 'block';
-        urlEl.style.margin = '10px 0';
-        urlEl.style.wordBreak = 'break-all';
         container.appendChild(urlEl);
 
         const button = document.createElement('button');

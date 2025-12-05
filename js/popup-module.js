@@ -4,12 +4,13 @@ import { SonarrApi } from './modules/sonarr-api.js';
 import { UI } from './modules/ui.js';
 import { formatDate } from './popup-util.js';
 import { ErrorHandler } from './error-handler.js';
+import { MODES } from './constants.js';
 
 const app = {
     settings: {},
     api: null,
     ui: null,
-    currentMode: 'calendar',
+    currentMode: MODES.CALENDAR,
 
     async init() {
         // Migration
@@ -40,7 +41,7 @@ const app = {
         }
 
         this.bindMenu();
-        this.load(this.settings.mode || 'calendar');
+        this.load(this.settings.mode || MODES.CALENDAR);
     },
 
     bindMenu() {
@@ -127,7 +128,7 @@ const app = {
             }
 
             let data;
-            if (mode === 'calendar') {
+            if (mode === MODES.CALENDAR) {
                 const startDate = new Date();
                 startDate.setHours(0, 0, 0, 0);
                 const start = startDate.toISOString();
@@ -141,7 +142,7 @@ const app = {
                     const text = wanted.totalRecords > 0 ? wanted.totalRecords.toString() : '';
                     chrome.action.setBadgeText({ text: text });
                 }
-            } else if (mode === 'series') {
+            } else if (mode === MODES.SERIES) {
                 data = await this.api.getSeries();
 
                 // Validate series data before caching
@@ -155,7 +156,7 @@ const app = {
                         return; // Skip the normal cache + render flow
                     }
                 }
-            } else if (mode === 'history') {
+            } else if (mode === MODES.HISTORY) {
                 data = await this.api.getHistory(1, this.settings.historyItems);
             }
 
@@ -172,11 +173,11 @@ const app = {
 
     render(mode, data) {
         this.ui.clear();
-        if (mode === 'calendar') {
+        if (mode === MODES.CALENDAR) {
             this.renderCalendarGroups(data);
-        } else if (mode === 'series') {
+        } else if (mode === MODES.SERIES) {
             this.ui.renderSeries(data);
-        } else if (mode === 'history') {
+        } else if (mode === MODES.HISTORY) {
             this.ui.renderHistory(data.records); // History API returns { records: [...] }
         }
     },

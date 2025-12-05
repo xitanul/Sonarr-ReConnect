@@ -10,17 +10,18 @@ import { EPISODE_STATUS_LABELS } from './constants.js';
  * @returns {string} CSS class name for the label
  */
 export function calculateEpisodeQuoteColor(episodeFileCount, totalEpisodeCount, monitored, status) {
-    let label = ""
-    if (episodeFileCount === totalEpisodeCount)
-        if (status === 'continuing')
+    let label = "";
+    if (episodeFileCount === totalEpisodeCount) {
+        if (status === 'continuing') {
             label = EPISODE_STATUS_LABELS['continuing'];
-        else
+        } else {
             label = EPISODE_STATUS_LABELS['ended'];
-    else if (monitored)
+        }
+    } else if (monitored) {
         label = EPISODE_STATUS_LABELS['missing-monitored'];
-    else
+    } else {
         label = EPISODE_STATUS_LABELS['missing-not-monitored'];
-
+    }
     return label;
 }
 
@@ -70,17 +71,19 @@ export function formatDate(date, positiveOffset) {
  * @returns {string} Full image URL with API key authentication
  */
 export function getImageUrl(data, baseUrl, apiKey) {
-    if (typeof data === "object") {
-        const start = data.url.indexOf('MediaCover')
+    // Early return if required parameters are missing
+    if (!data || !baseUrl || !apiKey) {
+        return '';
+    }
+    if (typeof data === "object" && data.url) {
+        const start = data.url.indexOf('MediaCover');
         // Note: Image URLs must use query parameter for authentication
         // because <img> tags cannot send custom headers
         // Use & because the URL already contains query parameters
         const newUrl = normalizeBaseUrl(baseUrl) + "api/v3/" + data.url.substring(start) + "&apikey=" + apiKey;
         return newUrl;
-    } else {
-        const noimg = "";
-        return noimg;
     }
+    return '';
 }
 
 /**
@@ -103,18 +106,21 @@ export function episodeComparator(a, b) {
     return 0;
 }
 
-// comparator to sort seasons by seasonNumber
+/**
+ * Comparator to sort series by status then title
+ * @param {Object} a - First series
+ * @param {Object} b - Second series
+ * @returns {number} Sort order (-1, 0, 1)
+ */
 export function seriesComparator(a, b) {
-    if (a.status != b.status) {
-        if (a.status < b.status)
-            return -1;
-        if (a.status > b.status)
-            return 1;
-        return 0;
+    if (a.status !== b.status) {
+        return a.status < b.status ? -1 : 1;
     }
-    if (a.sortTitle < b.sortTitle)
+    if (a.sortTitle < b.sortTitle) {
         return -1;
-    if (a.sortTitle > b.sortTitle)
+    }
+    if (a.sortTitle > b.sortTitle) {
         return 1;
+    }
     return 0;
 }

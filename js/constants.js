@@ -36,3 +36,10 @@ export const HISTORY_EVENT_TYPES = {
     'episodeFileRenamed': 'Renamed',
     'downloadIgnored': 'Ignored'
 };
+
+// View mode constants
+export const MODES = {
+    CALENDAR: 'calendar',
+    SERIES: 'series',
+    HISTORY: 'history'
+};

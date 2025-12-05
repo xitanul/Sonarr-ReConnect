@@ -43,18 +43,32 @@ export const ErrorHandler = {
      * @param {Function} onRetry - Optional retry callback
      */
     showErrorState(container, message, onRetry = null) {
-        container.innerHTML = `
-            <div class="error-state">
-                <i class="fi-alert"></i>
-                <h3>Oops! Something went wrong</h3>
-                <p>${message}</p>
-                ${onRetry ? '<button class="button retry-button">Try Again</button>' : ''}
-            </div>
-        `;
+        container.innerHTML = '';
+
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-state';
+
+        const icon = document.createElement('i');
+        icon.className = 'fi-alert';
+        errorDiv.appendChild(icon);
+
+        const heading = document.createElement('h3');
+        heading.textContent = 'Oops! Something went wrong';
+        errorDiv.appendChild(heading);
+
+        const messageEl = document.createElement('p');
+        messageEl.textContent = message;  // Safe: uses textContent instead of innerHTML
+        errorDiv.appendChild(messageEl);
 
         if (onRetry) {
-            container.querySelector('.retry-button')?.addEventListener('click', onRetry);
+            const button = document.createElement('button');
+            button.className = 'button retry-button';
+            button.textContent = 'Try Again';
+            button.addEventListener('click', onRetry);
+            errorDiv.appendChild(button);
         }
+
+        container.appendChild(errorDiv);
     },
 
     /**

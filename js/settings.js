@@ -5,7 +5,6 @@ export const Settings = {
         numberOfDaysCalendar: 7,
         wantedItems: 15,
         historyItems: 15,
-        calendarEndDate: 7,
         backgroundInterval: 5,
         sonarrConfig: {},
         showBadge: true

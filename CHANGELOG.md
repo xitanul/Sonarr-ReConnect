@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.7] - 2025-12-05
+
+### Security
+- Changed HTTP to HTTPS for Google Fonts import to prevent MITM attacks
+- Refactored error handler to use safe DOM methods instead of innerHTML to prevent XSS
+
+### Changed
+- Added `series.json` to `.gitignore` (debug data should not be in version control)
+- Added `MODES` constant to eliminate magic strings for view mode names
+- Removed unused `calendarEndDate` setting
+- Fixed comparators to use strict equality and proper bracing
+- Added null checks to `getImageUrl` function
+- Removed duplicate/stale comments throughout codebase
+- Refactored `renderPermissionRequest` to use CSS classes instead of inline styles
+- Fixed CSS lint warnings (removed empty rulesets, fixed vertical-align usage)
+
 ## [3.0.6] - 2025-12-04
 
 ### Security

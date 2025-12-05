@@ -1,4 +1,4 @@
-@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,700,900);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,700,900);
 
 @-moz-keyframes spin {
   from {
@@ -67,7 +67,6 @@ html {
 
 .load {
   margin: auto auto;
-  vertical-align: middle;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -95,10 +94,6 @@ img {
   vertical-align: middle;
   width: auto;
   height: auto;
-}
-
-.date {
-  /*  //border-left: .2rem solid #07abc9;*/
 }
 
 .wanted .button {
@@ -411,8 +406,6 @@ p {
   margin-left: 0;
 }
 
-.list .series {}
-
 .list .series:after {
   content: '';
   display: block;
@@ -522,4 +515,25 @@ p {
 
 .label:empty {
   display: none;
+}
+
+/* Permission Request Styles */
+.permission-request {
+  padding: 20px;
+  text-align: center;
+}
+
+.permission-request .shield-icon {
+  font-size: 48px;
+  color: #e67e22;
+}
+
+.permission-request h4 {
+  margin-top: 10px;
+}
+
+.permission-request code {
+  display: block;
+  margin: 10px 0;
+  word-break: break-all;
 }

@@ -1,25 +1,16 @@
 /**
- * 
+ * Options page handler
  * @author C.Vaes
  */
 
-
-/**
-* Check if url ends with a /
-*/
-/**
-* Check if url ends with a /
-*/
 import { normalizeBaseUrl } from './utils.js';
 import { Settings } from './settings.js';
 
-// checkUrl function removed, using normalizeBaseUrl from utils.js
-
-//empty sonarrConfig object
+// Sonarr configuration object populated after successful connection test
 let sonarrConfig = {};
 
 /**
- * Test connection to sonarr server with api key. api/system/status call is used
+ * Test connection to Sonarr server with API key
  */
 async function test_connection() {
   const apiKey = document.getElementById('apiKey').value;
