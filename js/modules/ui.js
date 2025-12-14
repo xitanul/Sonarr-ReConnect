@@ -187,6 +187,10 @@ export class UI {
             const posterImg = serie.images.find(i => i.coverType === 'poster');
             if (posterImg) {
                 poster.src = getImageUrl(posterImg, this.settings.url, this.settings.apiKey);
+                poster.addEventListener('click', () => {
+                    const event = new CustomEvent('show-details', { detail: { seriesId: serie.id }, bubbles: true });
+                    this.container.dispatchEvent(event);
+                });
             }
 
             listContainer.appendChild(clone);
