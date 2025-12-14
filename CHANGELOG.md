@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.8] - 2025-12-13
+
+### Fixed
+- **MV3 Reliability**: Added `await` to `fetchData()` calls in background alarm and storage listeners to prevent service worker from shutting down mid-fetch, fixing flaky badge updates
+- **Crash Prevention**: Added URL validation with try/catch for all `new URL()` calls to prevent crashes on invalid user input in `background.js`, `popup-module.js`, and `options.js`
+- **UX Improvement**: Added permission check before "Test connection" in options page to show clear message instead of failing silently
+
+### Security
+- Replaced `innerHTML` with safe DOM operations (`createElement` + `textContent`) for series status display to eliminate potential XSS vector
+- Replaced external Google Fonts URL with system font stack for better privacy, performance, and offline support
+
+### Changed
+- Removed unused `formatDate` import from `popup-module.js`
+- Removed unused `normalizeBaseUrl` import from `ui.js`
+- Removed unused `formatDate` function from `popup-util.js`
+
 ## [3.0.7] - 2025-12-05
 
 ### Security

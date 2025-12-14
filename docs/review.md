@@ -1,47 +1,58 @@
 # Code Review: Sonarr-ReConnect
 
-## Overview
-The extension is a Manifest V3 Chrome extension that interfaces with a Sonarr instance. It uses a background service worker for periodic updates and a popup for the UI.
+**Date:** 2025-12-14
+**Version:** 3.0.7 (Manifest V3)
 
-## Key Findings
+## 1. Executive Summary
 
-### 1. Architecture & MV3 Migration
-- **Service Worker Keep-Alive**: The extension uses an `offscreen` document to keep the service worker alive.
-  - **Issue**: `background.js` defines `self.onmessage = e => {};` but does not actually process the `keepAlive` message sent by `offscreen.js`. While the event itself might wake the SW, it's better to explicitly handle it or return a response.
-  - **Recommendation**: Implement a proper handshake or rely on `chrome.alarms` which is already being used. The `offscreen` approach might be redundant if `alarms` are working correctly for the fetch interval.
-- **Storage**: The app mixes `chrome.storage.sync` (for settings) and `localStorage` (for data caching).
-  - **Recommendation**: Standardize on `chrome.storage.local` for data caching to avoid synchronous blocking calls and to align with extension best practices.
+The **Sonarr-ReConnect** extension is a well-structured Chrome extension migrated to Manifest V3. It features a modular JavaScript architecture using ES modules, separates concerns between UI, API, and Storage, and implements recommended practices for background processing using Alarms.
 
-### 2. Code Quality & Modernization
-- **jQuery Usage**: The project relies heavily on jQuery (`$`).
-  - **Recommendation**: Modern Vanilla JS (ES6+) is sufficient for this complexity and would reduce bundle size and overhead.
-- **Variable Declarations**: `var` is used exclusively.
-  - **Recommendation**: Switch to `const` and `let` to avoid hoisting issues and improve scoping.
-- **Global Scope Pollution**: Objects like `sonarr`, `app`, `create`, `getSeries`, etc., are all in the global scope.
-  - **Recommendation**: Use ES modules or an IIFE (Immediately Invoked Function Expression) to encapsulate logic.
-- **Incorrect `delete` Usage**: The code frequently uses `delete variableName` (e.g., `delete historyList`). In JS, `delete` is for object properties. Deleting a variable is a no-op (or throws in strict mode).
-  - **Recommendation**: Let variables go out of scope naturally or set them to `null` if memory management is a specific concern (though unlikely needed here).
+The codebase is clean, readable, and exhibits good error handling patterns. No critical security vulnerabilities were identified, though there are standard recommendations for tightening security and improving robustness.
 
-### 3. Security
-- **XSS Risks**: The code constructs HTML strings using data from the API and inserts them using `.html()`.
-  - **Risk**: If the Sonarr instance returns malicious data (e.g., a series title with `<script>`), it could execute code.
-  - **Recommendation**: Use `textContent` (or jQuery's `.text()`) for text content, or use a sanitization library. Avoid string concatenation for HTML construction.
+## 2. Architecture & Structure
 
-### 4. Bugs & Logic Issues
-- **URL Construction**: The service worker builds URLs without ensuring a trailing slash on the base URL. `http://localhost:8989` becomes `http://localhost:8989api/v3/...`, causing fetches to fail.
-- **Episode Endpoint Typo**: The episode PUT endpoint contains an escaped placeholder `api/v3/episode/\{episodeId}`, which prevents proper ID replacement.
-- **Badge Logic**: The badge logic `this.settings.showBadge === "true" || parseInt(text, 10) > 0` is flawed. The `||` operator causes the badge to show whenever there are missing episodes, ignoring the user's "Show Badge" preference.
-- **`setSeasonData` Error**: This function references an undefined `callback` and tries to use a `season` mode that doesn't exist in settings.
-- **`prepLocalStorage`**: Sets items to the string `"undefined"` (`localStorage.setItem('wanted', undefined)` results in `"undefined"` string).
-  - **Fix**: Check for null/undefined properly.
-- **Error Handling**: `fetchData` in `background.js` catches errors but only logs them.
+- **Manifest V3**: Correctly uses `service_worker` for background tasks and `alarms` for periodic fetching.
+- **Modular Design**: The `js/modules/` directory cleanly separates the API layer (`sonarr-api.js`) and UI rendering (`ui.js`).
+- **State Management**: Uses `storage.sync` for settings and `storage.local` (implied by default wrapping in `storage.js` or standard usage) for caching data to minimize API calls.
+- **Event Driven**: Usage of `CustomEvent` for UI interactions (`toggle-monitor`, `show-details`) decreases coupling between `ui.js` and the main controller.
 
-### 5. UI/UX
-- **Templates**: The HTML uses hidden divs as templates (`.templates`).
-  - **Recommendation**: The `<template>` tag is the standard HTML5 way to do this.
+## 3. Code Quality
 
-## Next Steps
-1.  **Refactor to ES6+**: Replace `var` with `const/let`, use arrow functions, and modules.
-2.  **Remove jQuery**: Rewrite DOM manipulation in Vanilla JS.
-3.  **Fix Security**: Sanitize inputs and avoid `innerHTML`.
-4.  **Standardize Storage**: Use `chrome.storage` for everything.
+- **Modern JavaScript**: Usage of `async/await`, `export/import`, and optional chaining (`?.`) makes the code concise and modern.
+- **Error Handling**: 
+    - `ErrorHandler` class standardizes error messages.
+    - `_fetch` wrapper in `SonarrApi` correctly handles HTTP 401/404/500 responses.
+    - Network errors are caught and surfaced via toast messages or UI states.
+- **Permissions**: The extension checks for host permissions at runtime (`chrome.permissions.contains`) before making requests, adhering well to the optional permissions model.
+
+## 4. Security & Permissions
+
+- **Manifest Permissions**:
+    ```json
+    "optional_host_permissions": ["http://*/*", "https://*/*"]
+    ```
+    This is necessary for an extension that connects to self-hosted instances with arbitrary domains/IPs. The code correctly requests specific origin permissions at runtime.
+- **HTML Injection Checks**: 
+    - Most DOM manipulation uses `textContent`.
+    - `ui.js` uses `innerHTML` in a few places (`filterRow`, `show-status`).
+        - `show-status` injects `series.status` which comes from the API. While likely safe (enum values), it's good practice to sanitize or use `textContent` where possible.
+- **CSP**: Standard MV3 CSP applies. No unsafe inline scripts detected.
+
+## 5. User Experience (UX)
+
+- **Feedback**: Loading spinners and error states are consistently used.
+- **Badges**: Background script updates the badge count for "wanted" items effectively.
+- **Navigation**: Simple but effective tab-based navigation.
+
+## 6. Recommendations
+
+### Low Priority / enhancement
+1.  **Testing**: There are currently no automated tests. Adding Unit Tests (e.g., using Jest) for `sonarr-api.js` and formatting utilities would improve long-term maintainability.
+2.  **Robustness**: 
+    - In `background.js`, `periodInMinutes` validation ensures the alarm interval is valid (Chrome forces > 1 min).
+    - In `popup-module.js`, the caching logic is optimistic. If the cache structure changes in a future version, a migration strategy is already hinted at (`Storage.migrate`), which is excellent.
+3.  **Internationalization**: All strings are hardcoded in English. Using `chrome.i18n` would allow for future translations.
+
+## 7. Conclusion
+
+The extensions codebase is in excellent shape. It follows modern standards and handles the complexity of MV3 migrations well. The primary suggestion is to maintain this quality by adding automated tests and ensuring strict sanitization for any future HTML injection.

@@ -55,14 +55,6 @@ export function getEpisodeStatus(episode) {
     return labelClass;
 }
 
-//format date to be used in api
-//TODO improve
-export function formatDate(date, positiveOffset) {
-    if (positiveOffset != null)
-        date.setDate(date.getDate() + parseInt(positiveOffset));
-    return (date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + (date.getDate()));
-}
-
 /**
  * Get image URL for Sonarr media (posters, banners, etc.)
  * @param {Object} data - Image data object with url property

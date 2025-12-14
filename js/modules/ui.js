@@ -1,4 +1,4 @@
-import { getRelativeTime, normalizeBaseUrl } from '../utils.js';
+import { getRelativeTime } from '../utils.js';
 import { calculateEpisodeQuoteColor, formatEpisodeNumer, getImageUrl, seriesComparator, getEpisodeStatus } from '../popup-util.js';
 import { HISTORY_EVENT_TYPES } from '../constants.js';
 
@@ -217,7 +217,12 @@ export class UI {
         showEl.querySelector('#title').textContent = series.title;
         showEl.querySelector('#network').textContent = series.network;
 
-        showEl.querySelector('#show-status').innerHTML = `<i class="fi-play"></i> ${series.status}`;
+        const statusEl = showEl.querySelector('#show-status');
+        statusEl.textContent = '';
+        const icon = document.createElement('i');
+        icon.className = 'fi-play';
+        statusEl.appendChild(icon);
+        statusEl.appendChild(document.createTextNode(' ' + (series.status || '')));
         showEl.querySelector('#air-time').textContent = series.airTime;
         showEl.querySelector('#summary').textContent = series.overview;
 

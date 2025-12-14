@@ -17,7 +17,7 @@ const background = {
     chrome.alarms.onAlarm.addListener(async (alarm) => {
       if (alarm.name === "fetchData") {
         this.settings = await Settings.get();
-        this.fetchData();
+        await this.fetchData();
       }
     });
   },
@@ -25,18 +25,29 @@ const background = {
     chrome.storage.onChanged.addListener(async (changes, namespace) => {
       if (namespace === 'sync' && (changes.url || changes.apiKey || changes.wantedItems || changes.showBadge)) {
         this.settings = await Settings.get();
-        this.fetchData();
+        await this.fetchData();
       }
     });
   },
   fetchData: async function () {
     const baseUrl = normalizeBaseUrl(this.settings.url);
+    if (!baseUrl) {
+      console.log('[Background] No URL configured');
+      return;
+    }
+
     const apikey = this.settings.apiKey;
     const wantedItems = this.settings.wantedItems;
     const url = `${baseUrl}api/v3/wanted/missing?page=1&pageSize=${wantedItems}&sortKey=airDateUtc&sortDir=desc&includeSeries=true`;
 
     // Check permissions first
-    const origin = new URL(baseUrl).origin + '/*';
+    let origin;
+    try {
+      origin = new URL(baseUrl).origin + '/*';
+    } catch (e) {
+      console.log('[Background] Invalid URL:', baseUrl);
+      return;
+    }
     const hasPermission = await new Promise(resolve => {
       chrome.permissions.contains({ origins: [origin] }, resolve);
     });

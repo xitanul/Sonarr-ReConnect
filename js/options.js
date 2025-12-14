@@ -18,6 +18,26 @@ async function test_connection() {
   document.getElementById('url').value = url;
   const status = document.getElementById('connectionStatus');
 
+  // Check permission first
+  let origin;
+  try {
+    origin = new URL(url).origin + '/*';
+  } catch (e) {
+    status.textContent = 'Invalid URL format';
+    status.style.color = 'red';
+    return;
+  }
+
+  const hasPermission = await new Promise(resolve => {
+    chrome.permissions.contains({ origins: [origin] }, resolve);
+  });
+
+  if (!hasPermission) {
+    status.textContent = 'Permission required. Please save settings first to grant permission.';
+    status.style.color = 'orange';
+    return;
+  }
+
   status.textContent = 'Connecting to ' + url;
   status.style.color = '';
 
@@ -119,7 +139,15 @@ function save_options() {
   }
 
   // Request permission for the new URL
-  const origin = new URL(url).origin + '/*';
+  let origin;
+  try {
+    origin = new URL(url).origin + '/*';
+  } catch (e) {
+    status.textContent = 'Invalid URL format';
+    status.style.color = 'red';
+    return;
+  }
+
   chrome.permissions.request({
     origins: [origin]
   }, (granted) => {

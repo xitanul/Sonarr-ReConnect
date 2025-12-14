@@ -2,7 +2,6 @@ import { Settings } from './settings.js';
 import { Storage } from './storage.js';
 import { SonarrApi } from './modules/sonarr-api.js';
 import { UI } from './modules/ui.js';
-import { formatDate } from './popup-util.js';
 import { ErrorHandler } from './error-handler.js';
 import { MODES } from './constants.js';
 
@@ -22,7 +21,14 @@ const app = {
 
         // Check permissions
         if (this.settings.url) {
-            const origin = new URL(this.settings.url).origin + '/*';
+            let origin;
+            try {
+                origin = new URL(this.settings.url).origin + '/*';
+            } catch (e) {
+                console.error('[Popup] Invalid URL in settings:', this.settings.url);
+                return;
+            }
+
             const hasPermission = await new Promise(resolve => {
                 chrome.permissions.contains({ origins: [origin] }, resolve);
             });
