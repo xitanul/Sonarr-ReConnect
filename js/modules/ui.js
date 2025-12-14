@@ -1,4 +1,4 @@
-import { getRelativeTime } from '../utils.js';
+import { getRelativeTime, normalizeBaseUrl } from '../utils.js';
 import { calculateEpisodeQuoteColor, formatEpisodeNumer, getImageUrl, seriesComparator, getEpisodeStatus } from '../popup-util.js';
 import { HISTORY_EVENT_TYPES } from '../constants.js';
 
@@ -211,7 +211,15 @@ export class UI {
         const poster = series.images.find(i => i.coverType === 'poster');
         if (poster) {
             const posterUrl = getImageUrl(poster, this.settings.url, this.settings.apiKey);
-            showEl.querySelector('.poster img').src = posterUrl;
+            const posterEl = showEl.querySelector('.poster img');
+            posterEl.src = posterUrl;
+
+            posterEl.style.cursor = 'pointer';
+            posterEl.addEventListener('click', () => {
+                const baseUrl = normalizeBaseUrl(this.settings.url);
+                const seriesUrl = `${baseUrl}series/${series.titleSlug}`;
+                chrome.tabs.create({ url: seriesUrl });
+            });
         }
 
         showEl.querySelector('#title').textContent = series.title;
