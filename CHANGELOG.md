@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.1.0] - 2025-12-13
+
+### Security
+- **API Key Storage**: Moved API key from `chrome.storage.sync` to `chrome.storage.local` to prevent syncing credentials across devices, improving security
+
+### Fixed
+- Fixed critical typo in settings defaults (`showBad` → `showBadge`) that broke badge functionality
+
+### Changed
+- Settings module now splits storage: credentials in local storage, preferences in sync storage
+- Added automatic migration to move existing API keys from sync to local storage
+
 ## [3.0.8] - 2025-12-13
 
 ### Fixed
